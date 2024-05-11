@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}PaymentVerification index{% endblock %}
+
+{% block body %}
+    <h1>PaymentVerification index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>MontantPrevu</th>
+                <th>MontantRecu</th>
+                <th>TypePaiement</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for payment_verification in payment_verifications %}
+            <tr>
+                <td>{{ payment_verification.id }}</td>
+                <td>{{ payment_verification.montantPrevu }}</td>
+                <td>{{ payment_verification.montantRecu }}</td>
+                <td>{{ payment_verification.typePaiement }}</td>
+                <td>
+                    <a href="{{ path('app_payment_verification_show', {'id': payment_verification.id}) }}">show</a>
+                    <a href="{{ path('app_payment_verification_edit', {'id': payment_verification.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_payment_verification_new') }}">Create new</a>
+{% endblock %}

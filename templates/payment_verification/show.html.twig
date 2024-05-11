@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}PaymentVerification{% endblock %}
+
+{% block body %}
+    <h1>PaymentVerification</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ payment_verification.id }}</td>
+            </tr>
+            <tr>
+                <th>MontantPrevu</th>
+                <td>{{ payment_verification.montantPrevu }}</td>
+            </tr>
+            <tr>
+                <th>MontantRecu</th>
+                <td>{{ payment_verification.montantRecu }}</td>
+            </tr>
+            <tr>
+                <th>TypePaiement</th>
+                <td>{{ payment_verification.typePaiement }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_payment_verification_index') }}">back to list</a>
+
+    <a href="{{ path('app_payment_verification_edit', {'id': payment_verification.id}) }}">edit</a>
+
+    {{ include('payment_verification/_delete_form.html.twig') }}
+{% endblock %}

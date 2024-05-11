@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset("assets/css/profile.css") }}">
+    {% endblock %}
+
+{% block body %}
+    <div class="container">
+		{{ include('partials/_sidebar.html.twig') }}
+        <div class="main-content">
+            <h1>La liste des Utilisateurs</h1> 
+            <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Roles</th> 
+                        <th>Numero</th>
+                        <th>NomDeSociete</th>
+                        <th>actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
+                        <td>{{ user.numero }}</td>
+                        <td>{{ user.nomDeSociete }}</td>
+                        <td>
+                            <a href="{{ path('app_admin_edit', {'id': user.id}) }}" class="btn btn-primary">edit</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7">no records found</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table> 
+            </div>
+            <a href="{{ path('app_admin_new') }}" class="btn btn-primary">Creer nouveau</a>
+        </div>
+    </div>
+{% endblock %}

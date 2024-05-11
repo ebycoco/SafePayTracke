@@ -1,0 +1,306 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gardinage
+{% endblock %}
+
+{% block body %}
+	<style>
+		/* Custom styles */
+		body {
+			background-color: #f8f9fa;
+			font-family: Arial, sans-serif;
+		}
+
+		.container {
+			display: flex;
+			max-width: 1300px;
+			margin: 20px auto;
+			padding: 30px;
+			background-color: #fff;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+
+		.sidebar {
+			flex: 0 0 250px;
+			background-color: #00ffbf;
+			border-radius: 10px;
+			padding: 20px;
+			margin-right: 20px;
+		}
+
+		.main-content {
+			flex: 1;
+		}
+
+		h1 {
+			font-size: 28px;
+			text-align: center;
+			margin-bottom: 30px;
+			color: #333;
+		}
+
+		.btn {
+			display: block;
+			width: 100%;
+			padding: 10px 20px;
+			font-size: 16px;
+			border-radius: 5px;
+			cursor: pointer;
+			margin-bottom: 10px;
+		}
+		.active {
+    color: #fff !important;
+    background-color: #ff0080 !important;
+    border-color: #ff0080 !important;
+}
+
+		.btn-primary {
+			background-color: #ff00bf;
+			border-color: #ff00bf;
+			color: #fff;
+		}
+
+		.btn-primary:hover {
+			background-color: #ff0080;
+			border-color: #ff0080;
+		}
+
+		.profile-info {
+			background-color: #f8f9fa;
+			border-radius: 10px;
+			padding: 20px;
+			margin-bottom: 20px;
+		}
+
+		.profile-info p {
+			margin-bottom: 10px;
+		}
+
+		.profile-info p:last-child {
+			margin-bottom: 0;
+		}
+
+		.payment-table {
+			margin-top: 10px;
+		}
+
+		.payment-table h2 {
+			font-size: 24px;
+			text-align: center;
+			margin-bottom: 20px;
+			color: #333;
+		}
+
+		.payment-table table {
+			background-color: #fff;
+			border-radius: 10px;
+			overflow: hidden;
+		}
+
+		.payment-table table thead {
+			background-color: #007bff;
+			color: #fff;
+		}
+
+		.payment-table table th,
+		.payment-table table td {
+			border-color: #dee2e6;
+			padding: 15px;
+			text-align: center;
+		}
+
+		.payment-table table th,
+		.payment-table table td,
+		.payment-table table .btn {
+			border-radius: 5px;
+		}
+
+		.payment-table table .btn-primary,
+		.payment-table table .btn-secondary,
+		.payment-table table .btn-info,
+		.payment-table table .btn-danger {
+			padding: 8px 15px;
+			font-size: 14px;
+		}
+
+		.payment-table table .btn-primary:hover,
+		.payment-table table .btn-secondary:hover,
+		.payment-table table .btn-info:hover,
+		.payment-table table .btn-danger:hover {
+			opacity: 0.8;
+		}
+
+		/* Styles pour le formulaire de paiement */
+		#payment-form {
+			width: 300px;
+			margin: 0 auto;
+		}
+
+		#payment-form label {
+			display: block;
+			margin-bottom: 10px;
+		}
+
+		#payment-form input,
+		#payment-form button {
+			width: 100%;
+			padding: 8px;
+			margin-bottom: 15px;
+			border-radius: 5px;
+			border: 1px solid #ccc;
+		}
+
+		#submit-payment {
+			background-color: #007bff;
+			color: white;
+			cursor: pointer;
+		}
+
+		#submit-payment:hover {
+			background-color: #0056b3;
+		}
+
+		/* Styles pour le popup */
+		.popup {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			z-index: 9999;
+		}
+
+		.popup-content {
+			background-color: #fefefe;
+			margin: 20% auto;
+			padding: 20px;
+			border-radius: 5px;
+			width: 60%;
+		}
+
+		.close {
+			color: #aaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+
+		.close:hover,
+		.close:focus {
+			color: black;
+			text-decoration: none;
+			cursor: pointer;
+		}
+	</style>
+	<div class="container">
+		{{ include('partials/_sidebar.html.twig') }}
+		<div class="main-content">
+
+			<div class="payment-table">
+				<h2><strong>Tableau de Vérification des Paiements</strong></h2>
+				<div class="table-responsive">
+					<table class="table table-hover table-bordered">
+						<thead class="table-info">
+							<tr>
+                                <th scope="col">Locataire</th>
+								<th scope="col">Période de paiement</th>
+								<th scope="col">Montant prévu</th>
+								<th scope="col">Montant payé</th>
+								<th scope="col">Etat de paiement</th>
+								<th scope="col">Voir le reçu</th>
+								<th scope="col">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for payment in payments %}
+							{# <tr>
+								<td>Locataire 01</td>
+								<td>Janvier 2024</td>
+								<td>50000</td>
+								<td>50000</td>
+								<td>
+									<span class="badge bg-success">Payé</span>
+								</td>
+								<td>
+                                    <a href="#" class="btn btn-primary btn-sm"> <i class="fas fa-eye"></i> Voir</a>
+                                </td>
+								<td>
+									<button type="button" class="btn btn-secondary btn-sm"> <i class="fas fa-eye-slash"></i> Masquer</button>
+								</td>
+							</tr> #}
+							<tr>
+                                <td>{{ payment.users.nomDeSociete }}</td>
+								<td>{{ payment.datePaiement|date('F Y') }}</td> 
+								{% if payment.paymentVerifications is empty %}
+									<td>Pas encore </td>
+								{% else %}
+									<td>
+										{% for paymentVerification in payment.paymentVerifications %}
+											{{ paymentVerification.montantPrevu }} (Fcfa)
+										{% endfor %} 
+									</td>
+								{% endif %} 
+								
+								<td>{{ payment.montantAPayer }} (Fcfa)</td>
+								<td>
+									{% if payment.status == 'en attente' %}
+									<span class="badge bg-primary">{{ payment.status }}</span>
+								{% else %}
+									<span class="badge bg-success">{{ payment.status }}</span>
+								{% endif %} 
+								</td>
+								<td>
+                                    <a href="#">
+										<img src="{{ vich_uploader_asset(payment, 'imageFile')|imagine_filter('recu') }}" class="card-img-top" alt="{{payment.montantAPayer}}">
+									</a>
+                                </td>
+								<td>
+									{% if payment.status == 'en attente' %}
+									<a href="{{ path('app_verifier',{'id': payment.id}) }}" class="btn btn-success btn-sm"><i class="fas fa-check"></i>
+									Verifier
+									</a>
+								{% else %}
+									<a href="{{ path('app_verifier',{'id': payment.id}) }}" class="btn btn-danger btn-sm">
+										<i class="fas fa-eye-slash"></i>
+									Masquer
+									</a>
+								{% endif %} 
+								</td>
+							</tr>
+							
+							
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+                <div class="row justify-content-center mt-2">
+					<div class="col-md-10">
+						<!-- Ajoutez ici la pagination selon votre structure -->
+						<nav aria-label="Page navigation example">
+							<ul class="pagination justify-content-center">
+								<li class="page-item disabled">
+									<a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">1</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">2</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">3</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">Suivant</a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

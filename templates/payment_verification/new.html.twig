@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New PaymentVerification{% endblock %}
+
+{% block body %}
+    <h1>Create new PaymentVerification</h1>
+
+    {{ include('payment_verification/_form.html.twig') }}
+
+    <a href="{{ path('app_payment_verification_index') }}">back to list</a>
+{% endblock %}

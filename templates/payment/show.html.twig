@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Payment{% endblock %}
+
+{% block body %}
+    <h1>Payment</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ payment.id }}</td>
+            </tr>
+            <tr>
+                <th>MontantAPayer</th>
+                <td>{{ payment.montantAPayer }}</td>
+            </tr>
+            <tr>
+                <th>RecuDePaiement</th>
+                <td>{{ payment.recuDePaiement }}</td>
+            </tr>
+            <tr>
+                <th>MontantRestant</th>
+                <td>{{ payment.montantRestant }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ payment.status }}</td>
+            </tr>
+            <tr>
+                <th>IsVisibilite</th>
+                <td>{{ payment.isVisibilite ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>DatePaiement</th>
+                <td>{{ payment.datePaiement ? payment.datePaiement|date('Y-m-d') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_payment_index') }}">back to list</a>
+
+    <a href="{{ path('app_payment_edit', {'id': payment.id}) }}">edit</a>
+
+    {{ include('payment/_delete_form.html.twig') }}
+{% endblock %}

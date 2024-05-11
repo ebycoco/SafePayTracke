@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+	<head>
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+		<title>Connexion | Safe Pay Tracker</title>
+		<meta content="Responsive admin theme build on top of Bootstrap 4" name="description"/>
+		<meta content="Themesbrand" name="author"/>
+		<link rel="shortcut icon" href="{{asset('images/favicon.ico')}}">
+		<link href="{{asset('assets/css/login/bootstrap.min.css')}}" rel="stylesheet" type="text/css">
+		<link href="{{asset('assets/css/login/metismenu.min.css')}}" rel="stylesheet" type="text/css">
+		<link href="{{asset('assets/css/login/icons.css')}}" rel="stylesheet" type="text/css">
+		<link href="{{asset('assets/css/login/style.css')}}" rel="stylesheet" type="text/css">
+	</head>
+
+	<body class="bg-primary">
+		<div class="home-btn d-none d-sm-block">
+			<a href="{{path('app_home')}}" class="text-white">
+				<i class="fas fa-home h2"></i>
+			</a>
+		</div>
+		<div class="account-pages my-5 pt-5">
+			<div class="container">
+				<div class="row justify-content-center">
+					<div class="col-md-8 col-lg-6 col-xl-5"> {% block body %}{% endblock %}{% block javascripts %}{% endblock %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- jQuery  -->
+			<script src="{{asset('assets/js/login/jquery.min.js')}}"></script>
+			<script src="{{asset('assets/js/login/bootstrap.bundle.min.js')}}"></script>
+			<script src="{{asset('assets/js/login/metismenu.min.js')}}"></script>
+			<script src="{{asset('assets/js/login/jquery.slimscroll.js')}}"></script>
+			<script src="{{asset('assets/js/login/waves.min.js')}}"></script>
+
+			<!-- App js -->
+			<script src="{{asset('assets/js/login/app.js')}}"></script>
+
+		</body>
+
+	</html>

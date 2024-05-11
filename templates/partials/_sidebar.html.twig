@@ -1,0 +1,33 @@
+<div class="sidebar">
+			<!-- Sidebar actions -->
+			<h4><i class="fas fa-home"></i> Tableau de bord</h4>
+			<a class="btn btn-primary {{set_active_route('app_home')}}" href="{{ path('app_home') }}">Accueil</a>
+			<a class="btn btn-primary {{set_active_route('app_profile')}}" href="{{ path('app_profile') }}">Mon espace</a>
+			{% if is_granted('ROLE_LOCATEUR') %} 
+				<a class="btn btn-primary {{set_active_route('app_paiement')}}" href="{{ path('app_paiement') }}">Effectuer un Paiement</a>
+			{% endif %}
+			{% if is_granted('ROLE_GARDIEN') %}
+				<a class="btn btn-primary {{set_active_route('app_gardinage_index')}} {{set_active_route('app_gardinage_verifier')}}" href="{{ path('app_gardinage_index') }}">Vérification des Paiements</a>
+			{% endif %}
+			{% if is_granted('ROLE_ADMIN') %}
+				<a class="btn btn-primary {{set_active_route('app_admin_index')}}" href="{{ path('app_admin_index')}}">Permission d'accès</a>
+			{% endif %}
+			<a class="btn btn-primary {{set_active_route('modifier_profil')}}" href="{{ path('modifier_profil')}}">Modifier Profil</a>
+			<a class="btn btn-primary" href="#">Changer Mot de Passe</a>
+			<a class="btn btn-primary {{set_active_route('app_home')}}" href="{{ path('app_logout') }}">Déconnexion</a>
+
+
+			<!-- Profile Info -->
+			<hr>
+			<div class="profile-info">
+				<p>
+					<strong>{{ NomDeSociete }}</strong>
+				</p>
+				<p>
+					<strong>johndoe@example.com</strong>
+				</p>
+				<p>
+					<strong>+225 0757401657</strong>
+				</p>
+			</div>
+		</div>

@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil
+{% endblock %}
+
+{% block body %}
+	<style>
+		/* Custom styles */
+		body {
+			background-color: #f8f9fa;
+			font-family: Arial, sans-serif;
+		}
+		.container {
+			max-width: 800px;
+			margin: 50px auto;
+			padding: 30px;
+			background-color: #fff;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		h1 {
+			font-size: 28px;
+			text-align: center;
+			margin-bottom: 30px;
+			color: #333;
+		}
+		.btn {
+			padding: 10px 20px;
+			font-size: 16px;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+		.btn-primary {
+			background-color: #007bff;
+			border-color: #007bff;
+			color: #fff;
+		}
+		.btn-primary:hover {
+			background-color: #0056b3;
+			border-color: #0056b3;
+		}
+		.btn-secondary {
+			background-color: #6c757d;
+			border-color: #6c757d;
+			color: #fff;
+		}
+		.btn-secondary:hover {
+			background-color: #5a6268;
+			border-color: #545b62;
+		}
+		.btn-danger {
+			background-color: #dc3545;
+			border-color: #dc3545;
+			color: #fff;
+		}
+		.btn-danger:hover {
+			background-color: #c82333;
+			border-color: #bd2130;
+		}
+	</style>
+	<div class="container-fluid">
+		<div class="row justify-content-center mt-4">
+			<div class="col-md-9">
+				<div class="card shadow">
+					<div class="card-body">
+						<h2 class="card-title text-center mb-4">Tableau récapitulatif des {{ pluralize(nombreUtilisateurs,'Locataire') }}</h2>
+						<div class="table-responsive">
+							<table class="table table-hover table-bordered">
+								<thead class="table-info">
+									<tr>
+										<th scope="col">Locataire</th>
+										<th scope="col">Période de paiement</th>
+										<th scope="col">Montant payé</th>
+										<th scope="col">Date de paiement</th>
+										<th scope="col">Paiement</th>
+										<th scope="col">Solde</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for payment in payments %}
+									<tr>
+										<td>{{ payment.users.nomDeSociete }}</td>
+										<td>{{ payment.datePaiement|date('F Y') }}</td>
+										<td><strong>{{ payment.montantAPayer }}</strong> (Fcfa)</td>
+										<td>{{ payment.datePaiement|date('d-m-Y') }}</td>
+										<td>
+											{% if payment.status == 'en attente' %}
+												<span class="badge bg-primary">{{ payment.status }}</span>
+											{% elseif payment.status == 'Partiellement payé' %}
+												<span class="badge bg-warning">{{ payment.status }}</span>
+											{% elseif payment.status == 'Non payé' %}
+												<span class="badge bg-danger">{{ payment.status }}</span>
+											{% else %}
+												<span class="badge bg-success">{{ payment.status }}</span>
+											{% endif %} 
+										</td>
+										<td> <strong>{{ payment.solde }}</strong> (Fcfa)</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="8" style="text-align: center;">Pas de paiement</td>
+									</tr>
+								{% endfor %} 
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="row justify-content-center mt-5">
+					<div
+						class="col-md-10">
+						<!-- Ajoutez ici la pagination selon votre structure -->
+						<nav aria-label="Page navigation example">
+							<ul class="pagination justify-content-center">
+								<li class="page-item disabled">
+									<a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">1</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">2</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">3</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="#">Suivant</a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+
+			<div class="text-center mt-3">
+				<a href="{{ path('app_profile') }}" class="btn btn-primary btn-lg">Accéder à mon espace</a>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+

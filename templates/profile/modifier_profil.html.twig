@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier::Profile
+{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset("assets/css/modifier.css") }}">
+{% endblock %}
+{% block body %} 
+<div class="container">
+	{{ include('partials/_sidebar.html.twig') }}
+	<div class="main-content">
+		<h1>Modifier</h1>
+		{{ form_start(form) }}
+		{{ form_widget(form) }}
+		<button class="btn btn-primary">{{ button_label|default('Enregister') }}</button>
+		{{ form_end(form) }}
+
+	</div>
+</div>
+{% endblock %}
+

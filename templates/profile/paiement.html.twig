@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+{% block title %}Paiement
+{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset("assets/css/paiement.css") }}">
+{% endblock %}
+{% block body %} 
+	<div class="container">
+		{{ include('partials/_sidebar.html.twig') }}
+		<div class="main-content">
+			<h1>Paiement</h1>
+			{{ form_start(form,{'attr':{'id': 'payment-form'}}) }} 
+			{{ form_row(form.datePaiement, {'attr': {'name': 'payment-date','id': 'payment-date'}}) }}
+			{{ form_row(form.montantAPayer, {'attr': {'name': 'payment-amount','id': 'payment-amount'}}) }}
+			{{ form_row(form.imageFile) }}
+			  
+				<div class="col-md-12 alert alert-warning alert-dismissible fade show" role="alert" id="alertMessage" style="display:none;">
+					<strong>Attention!</strong>
+					Veuillez remplir tous les champs.
+				</div>
+
+				<button type="button" id="submit-payment" class="btn btn-primary">Envoyer</button>
+				<!-- Modal pour afficher les informations de paiement -->
+				<div class="modal fade" id="paymentInfoModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header bg-primary text-white">
+								<h5 class="modal-title" id="exampleModalLabel">Informations de paiement</h5>
+							</div>
+							<div
+								class="modal-body" id="paymentInfoModalBody"><!-- Contenu des informations de paiement -->
+							</div>
+							<div class="modal-footer">
+								<div class="modal-footer">
+									<div class="d-flex justify-content-end">
+										<button type="button" class="btn btn-danger me-2" data-bs-dismiss="modal">Fermer</button>
+										<button type="submit" class="btn btn-primary"id="confirme">Confirmer</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				{{ form_end(form) }} 
+     
+
+		</div>
+	</div>
+	{% block javascripts %} 
+        <script src="{{ "assets/js/paiement.js" }}" defer></script>
+    {% endblock %}
+{% endblock %}
