@@ -2,14 +2,15 @@
 
 namespace App\Form;
 
+use App\Entity\User;
 use App\Entity\Payment;
 use App\Entity\PaymentVerification;
-use App\Entity\User;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vich\UploaderBundle\Form\Type\VichImageType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class PaymentType extends AbstractType
 {
@@ -40,6 +41,14 @@ class PaymentType extends AbstractType
             //     'class' => PaymentVerification::class,
             //     'choice_label' => 'id',
             // ])
+            ->add('typePaiement', ChoiceType::class, [
+                'choices' => [
+                    'Paiement normal' => 'Normal',
+                    'Paiement retard' => 'Retard',
+                    'Paiement anticiper' => 'Anticiper',
+                ],
+                'placeholder'=> '-- Selectionner le type de paiement --',
+            ])
         ;
     }
 

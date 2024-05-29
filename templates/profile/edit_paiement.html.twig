@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier Paiement
+{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset("assets/css/retard.css") }}">
+{% endblock %}
+{% block body %}
+	<div class="container">
+		{{ include('partials/_sidebar.html.twig') }}
+		<div class="main-content">
+			<h1>Modifier Paiement</h1>
+			<div class="col-md-8">
+			{% if payment.montantRestant is not empty %}
+				<p> Vous le montant que vous devrer: <strong class="text-primary">{{payment.montantRestant}} Fcfa</strong></p> 
+			{% endif %}
+			{{ form_start(form,{'attr':{'id': 'payment-form'}}) }}
+						{{ form_row(form.montantAPayer, {'attr': {'name': 'payment-amount','id': 'payment-amount'}}) }}
+						{{ form_row(form.imageFile, {'attr': {'name': 'image-file', 'id': 'image-file'}}) }}
+						<div class="col-md-12 alert alert-warning alert-dismissible fade show" role="alert" id="alertMessage" style="display:none;">
+							<strong>Attention!</strong>
+							Veuillez remplir tous les champs.
+						</div>
+
+						<a href="#" id="submit-payment" class="btn btn-primary">Envoyer</a>
+						<!-- Exemple de modal avec un bouton de fermeture -->
+						<div class="modal fade" id="paymentInfoModal" tabindex="-1" aria-labelledby="paymentInfoModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="paymentInfoModalLabel">Détails du Paiement</h5>
+										<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+									</div>
+									<div class="modal-body" id="paymentInfoModalBody">
+										<!-- Contenu dynamique ici -->
+									</div>
+									<div class="modal-footer">
+										<button type="submit" id="confirme" class="btn btn-primary">Confirmer</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					{{ form_end(form) }}
+            </div>
+		</div>
+	</div>
+	{% block javascripts %}
+        <script src="{{ asset('assets/js/retard.js') }}"></script>
+    {% endblock %}
+{% endblock %}

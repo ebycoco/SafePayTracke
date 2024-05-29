@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Verification
+{% endblock %}
+{% block stylesheets %}
+	<link rel="stylesheet" href="{{ asset("assets/css/verifstyles.css") }}">
+{% endblock %}
+{% block body %}
+	<div class="container">
+		{{ include('partials/_sidebar.html.twig') }}
+		<div class="main-content">
+			<div class="p-3 mb-4 bg-body-tertiary rounded-3">
+				<div class="container-fluid py-2">
+					<h1 class="display-5 fw-bold">{{ payment.users.nomDeSociete }}</h1>
+					{% if payment.solde is not empty or payment.solde > 0 %}
+						<P>Vous doit un montant de :
+							<strong class="h5 text-warning">
+								{{payment.solde}}
+							</strong>
+							F cfa</P>
+					{% endif %}
+				</div>
+			</div>
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <p class="col-md-8 fs-4">Période du
+                        <strong>{{ mois }}</strong>
+                    </p>
+                    <small>Veuillez entrer le montant prévu pour le mois de
+                        <strong>{{ mois }}</strong>
+                        de
+                        {{ payment.users.nomDeSociete }}</small>
+                    <hr>
+                    {{ form_start(form, {label_attr: {class: 'row g-3'} }) }}
+
+                    {{ form_row(form.montantPrevu, {'attr': {'class': 'form-control','name': 'montantPrevu','id': 'montantPrevu'}}) }}
+                    <div class="col-md-12 alert alert-warning" role="alert" id="alertMessageVerif">
+                        <strong>Attention!</strong>
+                        Veuillez remplir tous les champs.
+                    </div>
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-primary" id="submit-verif">Envoyer</button>
+                    </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmation</h1>
+                                </div>
+                                <div class="modal-body" id="paymentModalBody"></div>
+                                <div class="modal-footer">
+                                    <div class="d-flex justify-content-end">
+                                        <button type="button" class="btn btn-danger me-2" data-bs-dismiss="modal">Fermer</button>
+                                        <button type="submit" class="btn btn-primary" id="confirme">Confirmer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+		</div>
+	</div>
+	{% block javascripts %}
+		<script src="{{ asset("assets/js/verifajoutprevuscripts.js") }}" defer></script>
+	{% endblock %}
+{% endblock %}

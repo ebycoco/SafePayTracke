@@ -1,0 +1,188 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {{ include('partials/_sidebar.html.twig') }}
+        <div class="main-content">
+            <!-- Payment Table -->
+            <div class="payment-table">
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }}" role="alert" style="text-align: center;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                <h2><strong>Tableau Récapitulatif des Paiements de {{ app.user.nomDeSociete }}</strong></h2>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col">Période de paiement</th>
+                                <th scope="col">Montant payé</th>
+                                <th scope="col">Reste payé</th>
+                                <th scope="col">Date de paiement</th>
+                                <th scope="col">Etat de paiement</th>
+                                <th scope="col">Crédit total</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Voir le reçu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set trans_day_hash = {
+                                'January': 'Janvier',
+                                'February': 'Février',
+                                'March': 'Mars',
+                                'April': 'Avril',
+                                'May': 'Mai',
+                                'June': 'Juin',
+                                'July': 'Juillet',
+                                'August': 'Août',
+                                'September': 'Septembre',
+                                'October': 'Octobre',
+                                'November': 'Novembre',
+                                'December': 'Décembre'
+                            } %}
+                            {% for payment in paiements %}
+                                <tr>
+                                    <td>
+                                        {% set dateFormatee = payment.datePaiement|date('F Y') %}
+                                        {{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
+                                    </td>
+                                    <td>
+                                        {% if payment.montantRestant is empty %}
+                                            <strong>{{ payment.montantAPayer }}</strong> F
+                                        {% else %}
+                                            <strong>{{ payment.montantPrevu - payment.montantRestant }}</strong> F
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment.montantRestant is not empty ? payment.montantRestant : '0' }} F</td>
+                                    <td>{{ payment.datePaiement|date('d-m-Y') }}</td>
+                                    <td>
+                                        {% set badgeClass = {
+                                            'en attente': 'primary',
+                                            'absent': 'warning',
+                                            'Non payé': 'danger',
+                                        }[payment.status] | default('success') %}
+                                        <span class="badge bg-{{ badgeClass }}">{{ payment.status }}</span>
+                                    </td>
+                                    <td>{{ payment.solde is not empty ? payment.solde : '0' }} F</td>
+                                    <td>
+                                        {% set dateFormatee = payment.datePaiement|date('F Y') %}
+                                        {% if payment.status == 'Payé' %}
+                                            <button type="button" class="btn btn-secondary btn-sm" disabled>Modifier</button>
+                                        {% elseif payment.status == 'partiel' %}
+                                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal" data-mois="{{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}" data-montantprevu="{{ payment.montantPrevu }}" data-montantapayer="{{ payment.montantAPayer }}">
+                                                Motif
+                                            </button>
+                                        {% elseif payment.status == 'Non payé' %}
+                                            <a href="{{ path('app_retard_paiement', {'id': payment.id}) }}" class="btn btn-danger btn-sm">Paiement</a>
+                                        {% elseif payment.status == 'absent' %}
+                                            <button type="button" class="btn btn-primary btn-sm" disabled>Impossible</button>
+                                        {% else %}
+                                            <a href="{{ path('app_edit_paiement', {'id': payment.id}) }}" class="btn btn-primary btn-sm">Modifier</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set dateFormatee = payment.datePaiement|date('F Y') %}
+                                        <a href="#" class="btn btn-{{ payment.status == 'Non payé' ? 'secondary' : 'primary' }} btn-sm" {{ payment.status == 'Non payé' ? 'disabled' : '' }} data-bs-toggle="modal" data-bs-target="#paymentModalVoir" data-montant="{{ payment.montantAPayer }}" data-date="{{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}" data-image="{{ vich_uploader_asset(payment, 'imageFile') }}">
+                                            Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8">Pas de paiement</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                {% if totalPages > 1 %}
+                    <div class="row justify-content-center mt-2">
+                        <div class="col-md-10">
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination justify-content-center">
+                                    <!-- Bouton "Précédent" -->
+                                    {% if currentPage > 1 %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_mes_retard_paiement', {'page': currentPage - 1}) }}" aria-label="Précédent">
+                                                <span aria-hidden="true">Précédent</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Précédent">
+                                                <span aria-hidden="true">Précédent</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    <!-- Liens numérotés des pages -->
+                                    {% for page in 1..totalPages %}
+                                        {% if page == currentPage %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ page }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ path('app_mes_retard_paiement', {'page': page}) }}">{{ page }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <!-- Bouton "Suivant" -->
+                                    {% if currentPage < totalPages %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_mes_retard_paiement', {'page': currentPage + 1}) }}" aria-label="Suivant">
+                                                <span aria-hidden="true">Suivant</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" aria-label="Suivant">
+                                                <span aria-hidden="true">Suivant</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        // Script pour remplir dynamiquement les modals avec les informations correctes
+        document.addEventListener('DOMContentLoaded', function () {
+            var paymentModal = document.getElementById('paymentModal');
+            paymentModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var mois = button.getAttribute('data-mois');
+                var montantPrevu = button.getAttribute('data-montantPrevu');
+                var montantAPayer = button.getAttribute('data-montantAPayer');
+                document.getElementById('modalMois').textContent = mois;
+                document.getElementById('modalMois2').textContent = mois;
+                document.getElementById('modalMontantPrevu').textContent = montantPrevu;
+                document.getElementById('modalMontantAPayer').textContent = montantAPayer;
+            });
+
+            var paymentModalVoir = document.getElementById('paymentModalVoir');
+            paymentModalVoir.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var montant = button.getAttribute('data-montant');
+                var date = button.getAttribute('data-date');
+                var image = button.getAttribute('data-image');
+                document.getElementById('modalMontantVoir').textContent = montant;
+                document.getElementById('modalDateVoir').textContent = date;
+                document.getElementById('modalImage').src = image;
+            });
+        });
+    </script>
+{% endblock %}

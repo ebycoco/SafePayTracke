@@ -21,7 +21,7 @@ class PaymentVerificationType extends AbstractType
                 'choices' => [
                     'Paiement normal' => 'Normal',
                     'Paiement retard' => 'Retard',
-                    'Paiement anticiper' => 'Anticiper', 
+                    'Paiement anticiper' => 'Anticiper',
                 ],
                 'placeholder'=> '-- Selectionner le type de paiement --',
             ])

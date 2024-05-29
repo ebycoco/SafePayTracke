@@ -1,0 +1,21 @@
+# translations/messages.fr.yaml
+
+# Months
+January: 'Janvier'
+February: 'Février'
+March: 'Mars'
+April: 'Avril'
+May: 'Mai'
+June: 'Juin'
+July: 'Juillet'
+August: 'Août'
+September: 'Septembre'
+October: 'Octobre'
+November: 'Novembre'
+December: 'Décembre'
+
+# Payment statuses
+en_attente: 'En attente'
+Partiel: 'Partiel'
+Non_payé: 'Non payé'
+Payé: 'Payé'

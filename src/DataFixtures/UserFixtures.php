@@ -5,8 +5,6 @@ namespace App\DataFixtures;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Faker\Factory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture
@@ -20,23 +18,23 @@ class UserFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create();
+        $usersData = [
+            ['email' => 'aroapartners@gmail.com', 'password' => '123456', 'numero' => '1234567890', 'nomDeSociete' => 'AROA Partners', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
+            ['email' => 'd2a@gmail.com', 'password' => '123456', 'numero' => '0987654321', 'nomDeSociete' => 'D2A', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
+            ['email' => 'ndoumy@gmail.com', 'password' => '123456', 'numero' => '1122334455', 'nomDeSociete' => 'M.Ndoumy', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
+            ['email' => 'gemica@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'GEMICA', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
+            ['email' => 'info@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'DUNAMIST SECURITY', 'isVerified' => true, 'roles' => ['ROLE_GARDIEN']],
+            ['email' => 'brouyaoeric7@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'AROA', 'isVerified' => true, 'roles' => ['ROLE_ADMIN']],
+        ];
 
-        for ($i = 0; $i < 10; $i++) {
+        foreach ($usersData as $userData) {
             $user = new User();
-            if ($i === 0) {
-                $user->setEmail("brouyaoeric7@gmail.com");
-                $user->setRoles(['ROLE_ADMIN']);
-            } else {
-                $user->setEmail($faker->email);
-                $user->setRoles(['ROLE_USER']);
-            }
-            $hashedPassword = $this->passwordEncoder->hashPassword($user, '123456');
-            $user->setPassword($hashedPassword); // Vous devez utiliser un mot de passe sécurisé
-
-            // Générer des données aléatoires avec Faker
-            $user->setNumero($faker->phoneNumber);
-            $user->setNomDeSociete($faker->company);
+            $user->setEmail($userData['email']);
+            $user->setRoles($userData['roles']);
+            $user->setPassword($this->passwordEncoder->hashPassword($user, $userData['password']));
+            $user->setNumero($userData['numero']);
+            $user->setNomDeSociete($userData['nomDeSociete']);
+            $user->setIsVerified($userData['isVerified']);
 
             $manager->persist($user);
         }

@@ -1,0 +1,106 @@
+<div class="row">
+				<div class="col-md-4">
+					{{ form_start(form,{'attr':{'id': 'payment-form'}}) }}
+						{{ form_row(form.typePaiement, {'attr': {'name': 'payment[typePaiement]','id': 'payment_typePaiement'}}) }}
+						{{ form_row(form.datePaiement, {'attr': {'name': 'payment-date','id': 'payment-date'}}) }}
+						{{ form_row(form.montantAPayer, {'attr': {'name': 'payment-amount','id': 'payment-amount'}}) }}
+						{{ form_row(form.imageFile) }}
+						<div class="col-md-12 alert alert-warning alert-dismissible fade show" role="alert" id="alertMessage" style="display:none;">
+							<strong>Attention!</strong>
+							Veuillez remplir tous les champs.
+						</div>
+
+						<button type="button" id="submit-payment" class="btn btn-primary">Envoyer</button>
+						<!-- Modal pour afficher les informations de paiement -->
+						<div class="modal fade" id="paymentInfoModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+							<div class="modal-dialog">
+								<div class="modal-content">
+									<div class="modal-header bg-primary text-white">
+										<h5 class="modal-title" id="exampleModalLabel">Informations de paiement</h5>
+									</div>
+									<div
+										class="modal-body" id="paymentInfoModalBody"><!-- Contenu des informations de paiement -->
+									</div>
+									<div class="modal-footer">
+										<div class="modal-footer">
+											<div class="d-flex justify-content-end">
+												<button type="button" class="btn btn-danger me-2" data-bs-dismiss="modal">Fermer</button>
+												<button type="submit" class="btn btn-primary"id="confirme">Confirmer</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					{{ form_end(form) }}
+				</div>
+				<div class="col-md-8">
+					<div class="table mt-4">
+						<table class="table table-hover table-bordered">
+							<thead class="table-primary">
+								<tr>
+									<th scope="col">Période</th>
+									<th scope="col">Reste payé</th> 
+									<th scope="col">Etat</th>
+									<th scope="col">Crédit total</th>
+									<th scope="col">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+							{% set trans_day_hash = {
+									"January": 'Janvier',
+									"February": 'Février',
+									"March": 'Mars',
+									"April": 'Avril',
+									"May": 'Mai',
+									"June": 'Juin',
+									"July": 'Juillet',
+									"August": 'Août',
+									"September": 'Septembre',
+									"October": 'Octobre',
+									"November": 'Novembre',
+									"December": 'Décembre'
+								} %}
+                            {% for paiement in findPaymentsByUserAll %}
+							{% if paiement.montantRestant == 0 %}
+							{% else %}
+								<tr>
+									<td>
+									 	{% set dateFormatee = paiement.datePaiement|date('F Y') %}
+                						{{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
+									</td>
+									<td>
+										{{paiement.montantRestant}} F
+
+									</td> 
+									<td>
+									{% if paiement.status == "Non payé" %}
+										<span class="badge bg-danger">{{paiement.status}}</span>
+									{% elseif paiement.status == "Partiel" %}
+										<span class="badge bg-warning">{{paiement.status}}</span>
+										{% elseif paiement.status == "en attente" %}
+										<span class="badge bg-info">{{paiement.status}}</span>
+									{% endif %} 
+									</td>
+									<td>
+										{{paiement.solde}} F
+									</td>
+									<td> 
+									{% if paiement.montantAPayer == 0 %}
+										<a href="{{ path('app_retard_paiement', {'id': paiement.id}) }}" class="btn btn-danger btn-sm">Payer</a>
+									{% else %}
+										{% if paiement.montantSaisir >0 %}
+											<button type="button" class="btn btn-primary btn-sm" disabled>attente</button>
+										{% else %}
+											<a href="{{ path('app_edit_paiement', {'id': paiement.id}) }}" class="btn btn-success btn-sm">Payer</a>
+										{% endif %}
+									{% endif %}
+									</td>
+								</tr>
+							{% endif %}
+                            {% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>

@@ -6,7 +6,9 @@ use App\Entity\Traits\AppTimesTampable;
 use App\Repository\PaymentVerificationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Table(name: '`payment_verification`')]
 #[ORM\Entity(repositoryClass: PaymentVerificationRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class PaymentVerification
 {
     use AppTimesTampable;
@@ -79,5 +81,10 @@ class PaymentVerification
         $this->Payment = $Payment;
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        return sprintf('PaymentVerification #%d', $this->id);
     }
 }

@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Page non trouvée{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <section class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <img src="{{ asset('images/404-error.webp') }}" alt="Page non trouvée" class="img-fluid">
+                <h1 class="display-4 mb-3">Oops!</h1>
+                <p class="lead">La page que vous recherchez n'a pas été trouvée.</p>
+                <a href="{{ path('app_home') }}" class="btn btn-primary">Retour à la page d'accueil</a>
+            </div>
+        </section>
+    </main>
+{% endblock %}

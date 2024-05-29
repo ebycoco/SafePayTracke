@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Activez votre compte</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .email-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .email-body {
+            padding: 20px;
+            color: #333;
+        }
+        .email-footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #ddd;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .highlight {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Activez votre compte</h1>
+        </div>
+        <div class="email-body">
+            <p>Bonjour <strong>{{ user.nomDeSociete }}</strong>,</p>
+            <p>Votre inscription sur le site <span class="highlight">Safe Pay Tracker</span> est à valider en cliquant sur le lien ci-dessous :</p>
+            <p style="text-align: center;">
+                <a href="{{ absolute_url(path('verify_user', {token: token})) }}" class="button">Activer votre compte</a>
+            </p>
+            <p>Ce lien expirera dans <strong>3 heures</strong>.</p>
+        </div>
+        <div class="email-footer">
+            <p>&copy; 2024 Safe Pay Tracker. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

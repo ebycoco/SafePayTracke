@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Erreur interne du serveur{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <section class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <img src="{{ asset('images/500-error.webp') }}" alt="Erreur serveur" class="img-fluid">
+                <h1 class="display-4 mb-3">Erreur interne du serveur</h1>
+                <p class="lead">Une erreur est survenue. Nous nous excusons pour la gêne occasionnée.</p>
+                <a href="{{ path('app_home') }}" class="btn btn-primary">Retour à la page d'accueil</a>
+            </div>
+        </section>
+    </main>
+{% endblock %}

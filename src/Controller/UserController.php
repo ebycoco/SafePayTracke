@@ -3,13 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\SignaleType;
 use App\Form\UserType;
+use App\Form\UserEditRoleType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/admin', name: 'app_admin_')]
 class UserController extends AbstractController
@@ -17,13 +19,15 @@ class UserController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
-        $utilisateurConnecte = $this->getUser(); 
+        $utilisateurConnecte = $this->getUser();
         $NomDeSociete= $utilisateurConnecte->getNomDeSociete();
         return $this->render('admin/index.html.twig', [
             'NomDeSociete'=> $NomDeSociete,
             'users' => $userRepository->findAll(),
         ]);
     }
+
+    
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -37,7 +41,7 @@ class UserController extends AbstractController
             $entityManager->flush();
 
             return $this->redirectToRoute('app_admin_index', [], Response::HTTP_SEE_OTHER);
-        } 
+        }
 
         return $this->render('admin/new.html.twig', [
             'user' => $user,
@@ -56,7 +60,7 @@ class UserController extends AbstractController
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(UserEditRoleType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -1,24 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {# <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>"> #}
+        <link rel="apple-touch-icon" sizes="180x180" href="{{asset("favicon_io/apple-touch-icon.png")}}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{asset("favicon_io/favicon-32x32.png")}}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{asset("favicon_io/favicon-16x16.png")}}">
+        <link rel="manifest" href="{{asset("favicon_io/site.webmanifest")}}">
+        
+
+        
         <link rel="stylesheet" href="{{ asset("assets/css/bootstrap.min.css") }}">
         <link href="{{asset('assets/css/login/icons.css')}}" rel="stylesheet" type="text/css">
-
-
-        {% block stylesheets %}
-        {% endblock %}
-        <link rel="stylesheet" href="{{ asset("assets/css/styles.css") }}">
-        <script src="{{ asset("assets/js/jquery-3.7.1.min.js") }}"></script> 
-            <script src="{{ asset("assets/js/bootstrap.bundle.min.js") }}" defer></script>
+        
+        {% block stylesheets %} 
+        {# <link rel="stylesheet" href="{{ asset("assets/css/styles.css") }}?v={{ 'now'|date('U') }}"> #}
+        {% endblock %} 
+         
             {% block javascripts %}
-                {% block importmap %}{{ importmap('app') }}{% endblock %} 
+                {# {% block importmap %}{{ importmap('app') }}{% endblock %}  #}
             {% endblock %} 
     </head>
     <body>
+    {% if app.user and app.user.isVerified == false %}
+        <div class="alert alert-warning alert-dismissible" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+            <div class="alert-message">
+                <strong>Votre compte n'est pas activé,veuillez activer pour accéder a votre espace</strong>, <a href="{{ path('resend_verif') }}">renvoyer le lien d'activation</a> 
+            </div>
+        </div>
+    {% endif %}
+    {{ include('partials/_flash.html.twig') }}
         {% block body %}{% endblock %}
-            
+        <script src="{{ asset("assets/js/jquery-3.7.1.min.js") }}"defer></script> 
+        <script src="{{ asset("assets/js/bootstrap.bundle.min.js") }}" defer></script>
     </body>
 </html>

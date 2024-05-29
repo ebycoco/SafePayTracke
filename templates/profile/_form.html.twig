@@ -1,0 +1,10 @@
+
+					{{ form_start(form,{'attr':{'id': 'payment-form'}}) }}
+						{{ form_row(form.montantAPayer, {'attr': {'name': 'payment-amount','id': 'payment-amount'}}) }}
+						<div class="col-md-12 alert alert-warning alert-dismissible fade show" role="alert" id="alertMessage" style="display:none;">
+							<strong>Attention!</strong>
+							Veuillez remplir tous les champs.
+						</div>
+
+						<button type="submit" id="submit-payment" class="btn btn-primary">Envoyer</button>
+					{{ form_end(form) }}

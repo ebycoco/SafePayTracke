@@ -5,10 +5,13 @@
 		<meta charset="utf-8"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-		<title>Inscription | AJEUTCHIM</title>
+		<title>Inscription | Safe Pay Tracker</title>
 		<meta content="Responsive admin theme build on top of Bootstrap 4" name="description"/>
 		<meta content="Themesbrand" name="author"/>
-		<link rel="shortcut icon" href="{{asset('images/faviconlo.ico')}}">
+		<link rel="apple-touch-icon" sizes="180x180" href="{{asset("favicon_io/apple-touch-icon.png")}}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{asset("favicon_io/favicon-32x32.png")}}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{asset("favicon_io/favicon-16x16.png")}}">
+        <link rel="manifest" href="{{asset("favicon_io/site.webmanifest")}}">
 
 		<link href="{{asset('assets/css/login/bootstrap.min.css')}}" rel="stylesheet" type="text/css">
 		<link href="{{asset('assets/css/login/metismenu.min.css')}}" rel="stylesheet" type="text/css">
@@ -23,14 +26,14 @@
 						<div class="account-page-full-height">
 							<div class="p-3">
 								<div>
-									<div class="text-center p-4">
+									<div class="text-center p-3">
 
 										<a href="{{path('app_home')}}" class="logo"><img src="{{asset('img/employee.png')}}" height="60" alt="logo"></a>
 									</div>
 									<div class="text-left p-3">
-										<h4 class="font-18 text-center">Free Register</h4>
-										<p class="text-muted text-center">Get your free Veltrix account now..</p>
-										{{ form_start(registrationForm, {label_attr: {class: 'form-horizontal mt-5'} }) }}
+										<h4 class="font-18 text-center">S'inscrire</h4>
+										<p class="text-muted text-center">Avoir un compte Safe Pay Tracker maintenant..</p>
+										{{ form_start(registrationForm, {label_attr: {class: 'form-horizontal mt-3'} }) }}
 
 										<div class="form-group">
 											{{ form_row(registrationForm.email, {'attr': {'class': 'form-control','id': 'email', 'placeholder': 'Email address'}}) }}
@@ -53,29 +56,22 @@
 
 										<div class="form-group row">
 											<div class="col-12 text-right">
-												<button class="btn btn-primary w-md waves-effect waves-light" type="submit">Register</button>
+												<button class="btn btn-primary w-md waves-effect waves-light" type="submit">S'inscrire</button>
 
 											</div>
-										</div>
-
-										<div class="form-group mt-2 mb-0 row">
-											<div class="col-12 mt-3">
-												<p class="mb-0">By registering you agree to the AJEUTCHIM
-												</p>
-											</div>
-										</div>
+										</div> 
 
 										{{ form_end(registrationForm) }}
 									</div>
-									<div class="mt-5 text-center">
+									<div class="mt-2 text-center">
 										<p>Already have an account ?
 											<a href="{{path('app_login')}}" class="font-500 text-primary">
 												Login
 											</a>
 										</p>
-										<p>© 2019 Veltrix. Crafted with
+										<p>© 2024 Safe Pay Tracker. Creer par
 											<i class="mdi mdi-heart text-danger"></i>
-											by Themesbrand</p>
+											by Ebychoco</p>
 									</div>
 								</div>
 							</div>
@@ -96,6 +92,12 @@
 								</div>
 							</div>
 							<div class="row">
+							<div class="col-xl-12">
+								<h1 class="text-white text-center">Les étapes d'inscription</h1>
+							</div>
+							</div>
+							<div class="row">
+							
 								<div class="col-xl-3">
 									<div class="text-center account-process p-4">
 										<h5 class="mt-0 mb-5 d-inline-block p-3 bg-primary rounded-circle border border-light position-relative">01</h5>
@@ -113,7 +115,7 @@
 											<i class="ion ion-ios-mail-unread h1"></i>
 										</div>
 										<h5>Boîte Gmail</h5>
-										<p class="text-white-50">Consulter sa boîte Gmail</p>
+										<p class="text-white-50">Consulter sa boîte Gmail. puis cliquer sur le lien d'activation pour activer votre compte</p>
 									</div>
 								</div>
 								<div class="col-xl-3">
@@ -123,7 +125,7 @@
 											<i class="ti-user h1"></i>
 										</div>
 										<h5>Se connecter</h5>
-										<p class="text-white-50">emo enim ipsam voluptatem quia</p>
+										<p class="text-white-50">Connectez-vous avec vos cordonnées lors de votre inscription.</p>
 									</div>
 								</div>
 								<div class="col-xl-3">
@@ -133,7 +135,7 @@
 											<i class="ti-bookmark-alt h1"></i>
 										</div>
 										<h5>Page de profile</h5>
-										<p class="text-white-50">Sed ut perspiciatis unde omnis iste</p>
+										<p class="text-white-50">Une fois sur votre espace, vous pouvez effectuer les actions</p>
 									</div>
 								</div>
 							</div>

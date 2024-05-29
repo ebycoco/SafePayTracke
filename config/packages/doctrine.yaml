@@ -24,6 +24,13 @@ doctrine:
                 alias: App
         controller_resolver:
             auto_mapping: true
+        
+        dql:
+            datetime_functions:
+                MONTH: DoctrineExtensions\Query\Mysql\Month
+                YEAR: DoctrineExtensions\Query\Mysql\Year
+                DAY: DoctrineExtensions\Query\Mysql\Day
+                DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
 
 when@test:
     doctrine:

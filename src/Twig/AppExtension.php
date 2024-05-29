@@ -4,7 +4,7 @@ namespace App\Twig;
 
 use Twig\TwigFilter;
 use Twig\TwigFunction;
-use Twig\Extension\AbstractExtension; 
+use Twig\Extension\AbstractExtension;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AppExtension extends AbstractExtension
@@ -39,14 +39,10 @@ class AppExtension extends AbstractExtension
         return $currentRoute == $route ? $activeClass : '';
     }
 
-     
-
     public function doSomething(int $count,string $singular,?string $plural =null):string
     {
         $plural = $plural ?? $singular . 's';
         $str = $count === 1 ? $singular : $plural;
         return "$count $str";
     }
-
-    
 }

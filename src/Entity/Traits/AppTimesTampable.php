@@ -1,59 +1,57 @@
 <?php
 
 namespace App\Entity\Traits;
+use Doctrine\ORM\Mapping as ORM;
 
 trait AppTimesTampable
 {
-    /**  
-     * @ORM\Column(type="datetime",options={"default": "CURRENT_TIMESTAMP"})
-     */
-    private $createdAt;
+   
+    #[ORM\Column(options: ["default" => "CURRENT_TIMESTAMP"])]
+    private ?\DateTimeImmutable $createdAt = null;
  
-    /**  
-     * @ORM\Column(type="datetime",options={"default": "CURRENT_TIMESTAMP"})
-     */
-    private  $updatedAt;
+    #[ORM\Column(options: ["default" => "CURRENT_TIMESTAMP"])]
+    private ?\DateTimeImmutable  $updatedAt =null;
 
     /**
-     * Get the value of createdAt
-     * 
-     */ 
-    public function getcreatedAt()
+     * Undocumented function
+     *
+     * @return \DateTimeImmutable|null
+     */
+    public function getcreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
     /**
-     * Set the value of createdAt
+     * Undocumented function
      *
-     * @param  \DateTimeInterface  $createdAt
-     *
-     * @return  self
-     */ 
-    public function setcreatedAt(\DateTimeInterface $createdAt)
+     * @param \DateTimeInterface $createdAt
+     * @return static
+     */
+    public function setcreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    /**
-     * Get the value of updatedAt
-     * 
-     */ 
-    public function getUpdatedAt()
+   /**
+    * Undocumented function
+    *
+    * @return \DateTimeImmutable|null
+    */
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
     /**
-     * Set the value of updatedAt
+     * Undocumented function
      *
-     * @param  \DateTimeInterface  $updatedAt
-     *
-     * @return  self
-     */ 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt)
+     * @param \DateTimeInterface $updatedAt
+     * @return static
+     */
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
 
@@ -61,11 +59,12 @@ trait AppTimesTampable
     }
 
     /**
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
+     * Undocumented function
      *
      * @return void
      */
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
     public function updateTimestamps()
     {
         if ($this->getcreatedAt() === null) {

@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gardinage{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset("assets/css/gardinage.css") }}">
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {{ include('partials/_sidebar.html.twig') }}
+        <div class="main-content">
+            <div class="payment-table">
+                <h2><strong>Tableau de Vérification des Paiements</strong></h2>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-info">
+                            <tr>
+                                <th scope="col">Période de paiement</th>
+                                <th scope="col">Locataire</th>
+                                <th scope="col">Montant prévu</th>
+                                <th scope="col">Montant payé</th>
+                                <th scope="col">Etat de paiement</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set trans_day_hash = {
+                            "January": 'Janvier',
+                            "February": 'Février',
+                            "March": 'Mars',
+                            "April": 'Avril',
+                            "May": 'Mai',
+                            "June": 'Juin',
+                            "July": 'Juillet',
+                            "August": 'Août',
+                            "September": 'Septembre',
+                            "October": 'Octobre',
+                            "November": 'Novembre',
+                            "December": 'Décembre'
+                        } %}
+                        {% for payment in payments.data %}
+                            <tr>
+                                <td>
+                                    {% set dateFormatee = payment.datePaiement|date('F Y') %}
+                                    {{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
+                                </td>
+                                <td>{{ payment.users.nomDeSociete }}</td>
+                                {% if payment.paymentVerifications is empty %}
+                                    <td>Pas encore</td>
+                                {% else %}
+                                    <td>{{ payment.montantPrevu }} (Fcfa)</td>
+                                {% endif %}
+                                <td>
+                                    {% if payment.montantRestant is empty %}
+                                        <strong>{{ payment.montantAPayer }}</strong> F
+                                    {% else %}
+                                        <strong>{{ payment.montantPrevu - payment.montantRestant }}</strong> F
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if payment.status == 'en attente' %}
+                                        <span class="badge bg-primary">{{ payment.status }}</span>
+                                    {% elseif payment.status == 'payé' %}
+                                        <span class="badge bg-success">{{ payment.status }}</span>
+                                    {% elseif payment.status == 'partiel' %}
+                                        <span class="badge bg-warning">{{ payment.status }}</span>
+                                    {% elseif payment.status == 'non payé' %}
+                                        <span class="badge bg-danger">{{ payment.status }}</span>
+                                    {% elseif payment.status == 'absent' %}
+                                        <span class="badge bg-info">{{ payment.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if payment.status == 'en attente' %}
+                                        <a href="{{ path('app_gardinage_verifier', {'id': payment.id}) }}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check"></i> Verifier
+                                        </a>
+                                    {% else %}
+                                        {% if payment.montantPrevu == payment.montantAPayer %}
+                                            {% if payment.montantRestant == 0 %}
+                                                {% if payment.status == 'Non payé' %}
+                                                    <a href="{{ path('app_gardinage_ajouterMontantPrevu', {'id': payment.id}) }}" class="btn btn-info btn-sm">
+                                                        <i class="fas fa-plus"></i> Ajout montant prévu
+                                                    </a>
+                                                {% else %}
+                                                    <a href="#" class="btn btn-info btn-sm btn-hide" data-id="{{ payment.id }}">
+                                                        <i class="fas fa-eye"></i> Restaurer
+                                                    </a>
+                                                {% endif %}
+                                            {% elseif payment.IsVerifier == false %}
+                                                <a href="{{ path('app_gardinage_verifier_nouveau', {'id': payment.id}) }}" class="btn btn-success btn-sm">
+                                                    <i class="fas fa-check"></i> Verifier nouveau
+                                                </a>
+                                            {% else %}
+                                                <button class="btn btn-info btn-sm" disabled>En attende</button>
+                                            {% endif %}
+                                        {% elseif payment.IsVerifier == false %}
+                                            <a href="{{ path('app_gardinage_verifier_nouveau', {'id': payment.id}) }}" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> Verifier nouveau
+                                            </a>
+                                        {% else %}
+                                            <button class="btn btn-info btn-sm" disabled>En attende</button>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% set path = 'app_gardinage_history' %}
+                {% set pages = payments.pages %}
+                {% set currentPage = payments.page %}
+                <div class="row justify-content-center mt-2">
+                    <div class="col-md-10">
+                        {% include "partials/_pagination.html.twig" %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.btn-hide').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                const paymentId = this.dataset.id;
+                fetch(`/gardinage/payment/voir/${paymentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Optionally remove the row from the table or provide some feedback to the user
+                        this.closest('tr').remove();
+                    } else {
+                        alert('An error occurred while updating visibility.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+{% endblock %}

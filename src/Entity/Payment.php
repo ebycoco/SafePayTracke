@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Traits\AppTimesTampable; 
+use App\Entity\Traits\AppTimesTampable;
 use App\Repository\PaymentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,8 +11,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
+#[ORM\Table(name: '`Payment`')]
+
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
 #[Vich\Uploadable]
+#[ORM\HasLifecycleCallbacks]
 class Payment
 {
     use AppTimesTampable;
@@ -25,11 +28,17 @@ class Payment
     #[ORM\Column]
     private ?int $montantAPayer = null;
 
+    #[ORM\Column]
+    private ?int $montantSaisir = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $totalMontantPayer = null;
+
     // NOTE: This is not a mapped field of entity metadata, just a simple property.
     #[Vich\UploadableField(mapping: 'recu', fileNameProperty: 'recuDePaiement')]
-    private ?File $imageFile = null; 
+    private ?File $imageFile = null;
 
-    #[ORM\Column (length: 255)]
+    #[ORM\Column (nullable: true,length: 255)]
     private ?string $recuDePaiement = null;
 
     #[ORM\Column(nullable: true)]
@@ -43,6 +52,9 @@ class Payment
 
     #[ORM\Column]
     private ?bool $isVisibilite = true;
+
+    #[ORM\Column]
+    private ?bool $isVerifier = false;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     private ?PaymentVerification $PaymentVerification = null;
@@ -58,7 +70,15 @@ class Payment
 
     #[ORM\Column(nullable: true)]
     private ?int $solde = null;
-    
+
+    #[ORM\Column(nullable: true)]
+    private ?int $montantPrevu = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $typePaiement = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $avancePaiement = null;
 
     public function __construct()
     {
@@ -82,7 +102,32 @@ class Payment
         return $this;
     }
 
-    /** 
+    public function getMontantSaisir(): ?int
+    {
+        return $this->montantSaisir;
+    }
+
+    public function setMontantSaisir(int $montantSaisir): static
+    {
+        $this->montantSaisir = $montantSaisir;
+
+        return $this;
+    }
+
+    public function getTotalMontantPayer(): ?int
+    {
+        return $this->totalMontantPayer;
+    }
+
+    public function setTotalMontantPayer(?int $totalMontantPayer): static
+    {
+        $this->totalMontantPayer = $totalMontantPayer;
+
+        return $this;
+    }
+
+
+    /**
      *
      * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $imageFile
      */
@@ -107,7 +152,7 @@ class Payment
         return $this->recuDePaiement;
     }
 
-    public function setRecuDePaiement(string $recuDePaiement): static
+    public function setRecuDePaiement(?string $recuDePaiement): static
     {
         $this->recuDePaiement = $recuDePaiement;
 
@@ -161,6 +206,19 @@ class Payment
 
         return $this;
     }
+
+    public function isVerifier(): ?bool
+    {
+        return $this->isVerifier;
+    }
+
+    public function setVerifier(bool $isVerifier): static
+    {
+        $this->isVerifier = $isVerifier;
+
+        return $this;
+    }
+
 
     public function getPaymentVerification(): ?PaymentVerification
     {
@@ -224,6 +282,42 @@ class Payment
     public function setSolde(?int $solde): static
     {
         $this->solde = $solde;
+
+        return $this;
+    }
+
+    public function getMontantPrevu(): ?int
+    {
+        return $this->montantPrevu;
+    }
+
+    public function setMontantPrevu(int $montantPrevu): static
+    {
+        $this->montantPrevu = $montantPrevu;
+
+        return $this;
+    }
+
+    public function getTypePaiement(): ?string
+    {
+        return $this->typePaiement;
+    }
+
+    public function setTypePaiement(string $typePaiement): static
+    {
+        $this->typePaiement = $typePaiement;
+
+        return $this;
+    }
+
+    public function getAvancePaiement(): ?int
+    {
+        return $this->avancePaiement;
+    }
+
+    public function setAvancePaiement(?int $avancePaiement): static
+    {
+        $this->avancePaiement = $avancePaiement;
 
         return $this;
     }

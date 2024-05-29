@@ -6,6 +6,11 @@ framework:
     http_method_override: false
     handle_all_throwables: true
 
+    default_locale: 'fr'  # Ajoutez cette ligne pour définir la locale par défaut
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks: ['fr']
+
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.
     session:

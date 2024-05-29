@@ -24,7 +24,6 @@ class UserType extends AbstractType
                 ],
                 'multiple' => true, // Si vous voulez sélectionner plusieurs rôles
                 'expanded' => true, // Si vous voulez afficher les options comme des cases à cocher
-                
             ])
             //->add('password')
             ->add('numero')
