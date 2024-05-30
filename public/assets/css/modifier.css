@@ -1,0 +1,189 @@
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    max-width: 1300px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar {
+    flex: 0 0 250px;
+    background-color: #00ffbf;
+    border-radius: 10px;
+    padding: 20px;
+    margin-right: 20px;
+}
+
+.main-content {
+    flex: 1;
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+.active {
+    color: #fff !important;
+    background-color: #ff0080 !important;
+    border-color: #ff0080 !important;
+}
+
+.btn-primary {
+    background-color: #ff00bf;
+    border-color: #ff00bf;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #ff0080;
+    border-color: #ff0080;
+}
+
+
+
+.profile-info {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.profile-info p {
+    margin-bottom: 10px;
+}
+
+.profile-info p:last-child {
+    margin-bottom: 0;
+}
+
+.payment-table {
+    margin-top: 50px;
+}
+
+.payment-table h2 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.payment-table table {
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.payment-table table thead {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.payment-table table th,
+.payment-table table td {
+    border-color: #dee2e6;
+    padding: 15px;
+    text-align: center;
+}
+
+.payment-table table th,
+.payment-table table td,
+.payment-table table .btn {
+    border-radius: 5px;
+}
+
+.payment-table table .btn-primary,
+.payment-table table .btn-secondary,
+.payment-table table .btn-info,
+.payment-table table .btn-danger {
+    padding: 8px 15px;
+    font-size: 14px;
+}
+
+.payment-table table .btn-primary:hover,
+.payment-table table .btn-secondary:hover,
+.payment-table table .btn-info:hover,
+.payment-table table .btn-danger:hover {
+    opacity: 0.8;
+}
+
+/* Styles pour le formulaire de paiement */
+#payment-form {
+    width: 300px;
+    margin: 0 auto;
+}
+
+#payment-form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+#payment-form input, #payment-form button {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#submit-payment {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+#submit-payment:hover {
+    background-color: #0056b3;
+}
+
+/* Styles pour le popup */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9999;
+}
+
+.popup-content {
+    background-color: #fefefe;
+    margin: 20% auto;
+    padding: 20px;
+    border-radius: 5px;
+    width: 60%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}

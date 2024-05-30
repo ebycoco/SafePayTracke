@@ -20,10 +20,10 @@
 ###< symfony/phpunit-bridge ###
 
 ###> symfony/asset-mapper ###
-/public/assets/
+# /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
 
 ###> liip/imagine-bundle ###
-/public/media/cache/
+# /public/media/cache/
 ###< liip/imagine-bundle ###
