@@ -1,70 +1,71 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Administration{% endblock %}
-    {% block stylesheets %}
-        <link rel="stylesheet" href="{{ asset("assets/css/profile.css") }}">
-    {% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}">
+{% endblock %}
 
 {% block body %}
     <div class="container">
-		{{ include('partials/_sidebar.html.twig') }}
+        {{ include('partials/_sidebar.html.twig') }}
         <div class="main-content">
-    <h1><strong>La liste des Utilisateurs</strong></h1>
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered">
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Roles</th>
-                    <th>Numéro Tel</th>
-                    <th>Nom De Societe</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                    <tr>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            {% for role in user.roles %}
-                                {% set name = '' %}
-                                {% if role == 'ROLE_ADMIN' %}
-                                    {% set name = 'Administrateur' %}
-                                    <span class="badge bg-info">{{ name }}</span>
-                                {% elseif role == 'ROLE_LOCATEUR' %}
-                                    {% set name = 'Locataire' %}
-                                    <span class="badge bg-success">{{ name }}</span>
-                                {% elseif role == 'ROLE_GARDIEN' %}
-                                    {% set name = 'Gardienage' %}
-                                    <span class="badge bg-warning">{{ name }}</span>
-                                {% endif %}
-                            {% endfor %}
-                        </td>
-                        <td>{{ user.numero }}</td>
-                        <td>{{ user.nomDeSociete }}</td>
-                        <td>
-                            {% if app.user.id == user.id %}
-                                <button class="btn btn-warning" disabled>Impossible</button>
-                            {% else %}
-                                <div class="d-flex">
-                                    <a href="{{ path('app_admin_edit', {'id': user.id}) }}" class="btn btn-primary me-2">
-                                        Attribuer role
-                                    </a>
-                                    {{ include('admin/_delete_form.html.twig') }}
-                                </div>
+            <h1><strong>La liste des Utilisateurs</strong></h1>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Roles</th>
+                            <th>Numéro Tel</th>
+                            <th>Nom De Societe</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            {% if 'ROLE_SUPER_ADMIN' not in user.roles %}
+                                <tr>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% for role in user.roles %}
+                                            {% set name = '' %}
+                                            {% if role == 'ROLE_ADMIN' %}
+                                                {% set name = 'Administrateur' %}
+                                                <span class="badge bg-info">{{ name }}</span>
+                                            {% elseif role == 'ROLE_LOCATEUR' %}
+                                                {% set name = 'Locataire' %}
+                                                <span class="badge bg-success">{{ name }}</span>
+                                            {% elseif role == 'ROLE_GARDIEN' %}
+                                                {% set name = 'Gardienage' %}
+                                                <span class="badge bg-warning">{{ name }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ user.numero }}</td>
+                                    <td>{{ user.nomDeSociete }}</td>
+                                    <td>
+                                        {% if app.user.id == user.id %}
+                                            <button class="btn btn-warning" disabled>Impossible</button>
+                                        {% else %}
+                                            <div class="d-flex">
+                                                <a href="{{ path('app_admin_edit', {'id': user.id}) }}" class="btn btn-primary me-2">
+                                                    Attribuer role
+                                                </a>
+                                                {{ include('admin/_delete_form.html.twig') }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             {% endif %}
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center">Aucun enregistrement trouvé</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {# <a href="{{ path('app_admin_new') }}" class="btn btn-primary">Créer nouveau</a> #}
-</div>
-
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center">Aucun enregistrement trouvé</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# <a href="{{ path('app_admin_new') }}" class="btn btn-primary">Créer nouveau</a> #}
+        </div>
     </div>
 {% endblock %}
