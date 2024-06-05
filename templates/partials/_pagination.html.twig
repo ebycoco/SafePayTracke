@@ -10,36 +10,40 @@
                     <span class="page-link">Précédent</span>
                 </li>
             {% endif %}
-            {# Affichage des deux premiers numéros de page #}
-            {% for page in range(1, min(2, pages)) %}
-                <li class="page-item {{ (page == currentPage) ? 'active' : '' }}">
-                    <a href="{{ path(path, { page: page }) }}" class="page-link">{{ page }}</a>
-                </li>
-            {% endfor %}
-            {# Affichage des points si nécessaire #}
+
+            {# Always show the first page #}
+            <li class="page-item {{ currentPage == 1 ? 'active' : '' }}">
+                <a href="{{ path(path, { page: 1 }) }}" class="page-link">1</a>
+            </li>
+
+            {# Show dots if currentPage > 3 #}
             {% if currentPage > 3 %}
                 <li class="page-item disabled">
                     <span class="page-link">...</span>
                 </li>
             {% endif %}
-            {# Affichage des numéros de page du milieu #}
-            {% for page in range(max(currentPage - 1, 3), min(currentPage + 1, pages - 2)) %}
+
+            {# Display pages around the current page #}
+            {% for page in range(max(2, currentPage - 1), min(currentPage + 1, pages - 1)) %}
                 <li class="page-item {{ (page == currentPage) ? 'active' : '' }}">
                     <a href="{{ path(path, { page: page }) }}" class="page-link">{{ page }}</a>
                 </li>
             {% endfor %}
-            {# Affichage des points si nécessaire #}
+
+            {# Show dots if currentPage < pages - 2 #}
             {% if currentPage < pages - 2 %}
                 <li class="page-item disabled">
                     <span class="page-link">...</span>
                 </li>
             {% endif %}
-            {# Affichage des deux derniers numéros de page #}
-            {% for page in range(max(pages - 1, currentPage + 1), pages) %}
-                <li class="page-item {{ (page == currentPage) ? 'active' : '' }}">
-                    <a href="{{ path(path, { page: page }) }}" class="page-link">{{ page }}</a>
+
+            {# Always show the last page #}
+            {% if pages > 1 %}
+                <li class="page-item {{ currentPage == pages ? 'active' : '' }}">
+                    <a href="{{ path(path, { page: pages }) }}" class="page-link">{{ pages }}</a>
                 </li>
-            {% endfor %}
+            {% endif %}
+
             {% if currentPage < pages %}
                 <li class="page-item">
                     <a href="{{ path(path, { page: currentPage + 1}) }}" class="page-link">Suivant</a>

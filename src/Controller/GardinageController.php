@@ -28,13 +28,13 @@ class GardinageController extends AbstractController
         //On va chercher le numéro de page dans l'url
 
         $page = $request->query->getInt('page', 1);
-        $payments = $paymentRepository->findPaymentPaginated($page, 4);
-        if (empty($payments)) {
+        $paymentsData = $paymentRepository->findPaymentPaginated($page, 4);
+        if (empty($paymentsData)) {
             $this->addFlash('info', "Aucun paiement n'est encour...");
             return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
         }
         return $this->render('gardinage/index.html.twig',  [
-            'payments' => $payments,
+            'payments' => $paymentsData,
 
         ]);
     }

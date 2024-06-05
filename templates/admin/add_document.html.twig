@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter document{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+            {{ include('partials/_sidebar.html.twig') }}
+            <div class="main-content">
+                <h1>Ajouter un nouvel document</h1> 
+                <div class="d-flex justify-content-center">
+                {{ form_start(form) }}
+                    {{ form_widget(form) }}
+                    <button class="btn btn-primary justify-content-center" style="width: 28%;">{{ button_label|default('Enregistrer') }}</button>
+                {{ form_end(form) }}
+                </div> 
+
+        </div>
+    </div>
+{% endblock %}

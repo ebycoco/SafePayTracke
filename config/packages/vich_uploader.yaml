@@ -5,10 +5,11 @@ vich_uploader:
         type: attribute
 
     mappings:
-       recu:
-           uri_prefix: /images/recu
-           upload_destination: '%kernel.project_dir%/public/images/recu'
-           namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
-           
-
-            
+        document:
+            uri_prefix: /images/document
+            upload_destination: '%kernel.project_dir%/public/images/document'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        recu:
+            uri_prefix: /images/recu
+            upload_destination: '%kernel.project_dir%/public/images/recu'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

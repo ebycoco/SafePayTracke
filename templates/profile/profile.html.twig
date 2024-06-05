@@ -174,101 +174,64 @@
 					</table>
 				</div>
 				<!-- Pagination -->
-{% if totalPages > 1 %}
-    <div class="row justify-content-center mt-2">
-        <div class="col-md-10">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
+				{% if totalPages > 1 %}
+					<div class="row justify-content-center mt-2">
+						<div class="col-md-10">
+							<nav aria-label="Page navigation example">
+								<ul class="pagination justify-content-center">
 
-                    <!-- Bouton "Précédent" -->
-                    {% if currentPage > 1 %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ path('app_profile', {'page': currentPage - 1}) }}" aria-label="Précédent">
-                                <span aria-hidden="true">Précédent</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Précédent">
-                                <span aria-hidden="true">Précédent</span>
-                            </a>
-                        </li>
-                    {% endif %}
+									<!-- Bouton "Précédent" -->
+									{% if currentPage > 1 %}
+										<li class="page-item">
+											<a class="page-link" href="{{ path('app_profile', {'page': currentPage - 1}) }}" aria-label="Précédent">
+												<span aria-hidden="true">Précédent</span>
+											</a>
+										</li>
+									{% else %}
+										<li class="page-item disabled">
+											<a class="page-link" href="#" aria-label="Précédent">
+												<span aria-hidden="true">Précédent</span>
+											</a>
+										</li>
+									{% endif %}
 
-                    <!-- Liens numérotés des pages -->
-                    {# Affichage des deux premiers numéros de page #}
-                    {% for page in range(1, min(2, totalPages)) %}
-                        {% if page == currentPage %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ page }}</span>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ path('app_profile', {'page': page}) }}">{{ page }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
+									<!-- Liens numérotés des pages -->
+									{% for page in range(1, totalPages) %}
+										{% if page == currentPage %}
+											<li class="page-item active">
+												<span class="page-link">{{ page }}</span>
+											</li>
+										{% elseif page == 1 or page == totalPages or (page >= currentPage - 1 and page <= currentPage + 1) %}
+											<li class="page-item">
+												<a class="page-link" href="{{ path('app_profile', {'page': page}) }}">{{ page }}</a>
+											</li>
+										{% elseif page == currentPage - 2 or page == currentPage + 2 %}
+											<li class="page-item disabled">
+												<span class="page-link">...</span>
+											</li>
+										{% endif %}
+									{% endfor %}
 
-                    <!-- Affichage des points si nécessaire avant le milieu -->
-                    {% if currentPage > 3 %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    {% endif %}
+									<!-- Bouton "Suivant" -->
+									{% if currentPage < totalPages %}
+										<li class="page-item">
+											<a class="page-link" href="{{ path('app_profile', {'page': currentPage + 1}) }}" aria-label="Suivant">
+												<span aria-hidden="true">Suivant</span>
+											</a>
+										</li>
+									{% else %}
+										<li class="page-item disabled">
+											<a class="page-link" href="#" aria-label="Suivant">
+												<span aria-hidden="true">Suivant</span>
+											</a>
+										</li>
+									{% endif %}
 
-                    <!-- Liens numérotés des pages au milieu -->
-                    {% for page in range(max(currentPage - 1, 3), min(currentPage + 1, totalPages - 2)) %}
-                        {% if page == currentPage %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ page }}</span>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ path('app_profile', {'page': page}) }}">{{ page }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    <!-- Affichage des points si nécessaire après le milieu -->
-                    {% if currentPage < totalPages - 2 %}
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    {% endif %}
-
-                    <!-- Affichage des deux derniers numéros de page -->
-                    {% for page in range(max(totalPages - 1, currentPage + 1), totalPages) %}
-                        {% if page == currentPage %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ page }}</span>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="{{ path('app_profile', {'page': page}) }}">{{ page }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    <!-- Bouton "Suivant" -->
-                    {% if currentPage < totalPages %}
-                        <li class="page-item">
-                            <a class="page-link" href="{{ path('app_profile', {'page': currentPage + 1}) }}" aria-label="Suivant">
-                                <span aria-hidden="true">Suivant</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Suivant">
-                                <span aria-hidden="true">Suivant</span>
-                            </a>
-                        </li>
-                    {% endif %}
-
-                </ul>
-            </nav>
-        </div>
-    </div>
-{% endif %}
+								</ul>
+							</nav>
+						</div>
+					</div>
+				{% endif %}
 
 			</div>
 		</div>
@@ -276,32 +239,32 @@
 	</div>
 	<script>
 		// Script pour remplir dynamiquement les modals avec les informations correctes
-document.addEventListener('DOMContentLoaded', function () {
-var paymentModal = document.getElementById('paymentModal');
-paymentModal.addEventListener('show.bs.modal', function (event) {
-var button = event.relatedTarget;
-var mois = button.getAttribute('data-mois');
-var montantPrevu = button.getAttribute('data-montantPrevu');
-var montantAPayer = button.getAttribute('data-montantAPayer');
+		document.addEventListener('DOMContentLoaded', function () {
+		var paymentModal = document.getElementById('paymentModal');
+		paymentModal.addEventListener('show.bs.modal', function (event) {
+		var button = event.relatedTarget;
+		var mois = button.getAttribute('data-mois');
+		var montantPrevu = button.getAttribute('data-montantPrevu');
+		var montantAPayer = button.getAttribute('data-montantAPayer');
 
-document.getElementById('modalMois').textContent = mois;
-document.getElementById('modalMois2').textContent = mois;
-document.getElementById('modalMontantPrevu').textContent = montantPrevu;
-document.getElementById('modalMontantAPayer').textContent = montantAPayer;
-});
+		document.getElementById('modalMois').textContent = mois;
+		document.getElementById('modalMois2').textContent = mois;
+		document.getElementById('modalMontantPrevu').textContent = montantPrevu;
+		document.getElementById('modalMontantAPayer').textContent = montantAPayer;
+		});
 
-var paymentModalVoir = document.getElementById('paymentModalVoir');
-paymentModalVoir.addEventListener('show.bs.modal', function (event) {
-var button = event.relatedTarget;
-var montant = button.getAttribute('data-montant');
-var date = button.getAttribute('data-date');
-var image = button.getAttribute('data-image');
+		var paymentModalVoir = document.getElementById('paymentModalVoir');
+		paymentModalVoir.addEventListener('show.bs.modal', function (event) {
+		var button = event.relatedTarget;
+		var montant = button.getAttribute('data-montant');
+		var date = button.getAttribute('data-date');
+		var image = button.getAttribute('data-image');
 
-document.getElementById('modalMontantVoir').textContent = montant;
-document.getElementById('modalDateVoir').textContent = date;
-document.getElementById('modalImage').src = image;
-});
-});
+		document.getElementById('modalMontantVoir').textContent = montant;
+		document.getElementById('modalDateVoir').textContent = date;
+		document.getElementById('modalImage').src = image;
+		});
+		});
 	</script>
 
 {% endblock %}

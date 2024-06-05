@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\SignaleType;
 use App\Form\UserType;
+use App\Entity\Document;
+use App\Form\SignaleType;
+use App\Form\DocumentType;
 use App\Form\UserEditRoleType;
 use App\Repository\UserRepository;
+use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +30,62 @@ class UserController extends AbstractController
         ]);
     }
 
-    
+    #[Route('/document', name: 'lis_doc', methods: ['GET'])]
+    public function lisDoc(DocumentRepository $documentRepository): Response
+    {
+        return $this->render('admin/document.html.twig', [
+            'documents' => $documentRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/ajouter-document', name: 'add_doc', methods: ['GET', 'POST'])]
+    public function addDoc(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $document = new Document();
+        $form = $this->createForm(DocumentType::class, $document);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($document);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_admin_lis_doc', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('admin/add_document.html.twig', [
+            'document' => $document,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}/modifier-document', name: 'edit_doc', methods: ['GET', 'POST'])]
+    public function editDoc(Request $request, Document $document, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(DocumentType::class, $document);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_admin_lis_doc', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('admin/edit_document.html.twig', [
+            'document' => $document,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'delete_doc', methods: ['POST'])]
+    public function deleteDoc(Request $request, Document $document, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$document->getId(), $request->getPayload()->get('_token'))) {
+            $entityManager->remove($document);
+            $entityManager->flush();
+        }
+ 
+        return $this->redirectToRoute('app_admin_lis_doc', [], Response::HTTP_SEE_OTHER);
+    }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response

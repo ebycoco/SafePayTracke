@@ -60,14 +60,14 @@
         </div>
         <div class="email-body">
             <p>Bonjour <strong>{{ user.nomDeSociete }}</strong>,</p>
-            <p>Votre inscription sur le site <span class="highlight">Safe Pay Tracker</span> est à valider en cliquant sur le lien ci-dessous :</p>
+            <p>Votre inscription sur le site <span class="highlight">APTracker</span> est à valider en cliquant sur le lien ci-dessous :</p>
             <p style="text-align: center;">
                 <a href="{{ absolute_url(path('verify_user', {token: token})) }}" class="button">Activer votre compte</a>
             </p>
             <p>Ce lien expirera dans <strong>3 heures</strong>.</p>
         </div>
         <div class="email-footer">
-            <p>&copy; 2024 Safe Pay Tracker. Tous droits réservés.</p>
+            <p>&copy; 2024 APTracker. Tous droits réservés.</p>
         </div>
     </div>
 </body>

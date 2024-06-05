@@ -61,9 +61,9 @@ class RegistrationController extends AbstractController
             $token = $jwt->generate($header, $payload, $this->getParameter('app.jwtsecret'));
             // On envoie un mail
             $mail->send(
-                'no-reply@monsite.net',
+                'no-reply@aroapartners.net',
                 $user->getEmail(),
-                'Activation de votre compte sur le site Safe Pay Tracker',
+                'Activation de votre compte sur le site APTracker',
                 'register',
                 compact('user', 'token')
             );
@@ -92,7 +92,7 @@ class RegistrationController extends AbstractController
             //On vérifie que l'utilisateur existe et n'a pas encore activé son compte
             if($user && !$user->isVerified()){
                 $user->setIsVerified(true);
-                $user->setRoles(['ROLE_LOCATEUR']);
+                // $user->setRoles(['ROLE_LOCATEUR']);
                 $em->flush($user);
                 $this->addFlash('success', 'Utilisateur activé');
                 return $this->redirectToRoute('app_home');
@@ -135,9 +135,9 @@ class RegistrationController extends AbstractController
 
         // On envoie un mail
         $mail->send(
-            'no-reply@monsite.net',
+            'no-reply@aroapartners.net',
             $user->getEmail(),
-            'Activation de votre compte sur le site e-commerce',
+            'Activation de votre compte sur le site APTracker',
             'register',
             compact('user', 'token')
         );

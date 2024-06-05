@@ -44,6 +44,7 @@ class ProfileController extends AbstractController
         $totalPaiements = $paymentRepository->count(['users' => $utilisateurConnecte]);
         // Calculer le nombre total de pages
         $totalPages = ceil($totalPaiements / $limit);
+        // dd($page, $totalPages);
         return $this->render('profile/profile.html.twig', [
             'paiements' => $paiements,
             'totalPages' => $totalPages,
@@ -89,7 +90,7 @@ class ProfileController extends AbstractController
 
                 // Envoi du mail
                 $mail->send(
-                    'no-reply@safepaytracker.com',
+                    'no-reply@aroapartners.net',
                     $user->getEmail(),
                     'Réinitialisation de mot de passe',
                     'password_reset',

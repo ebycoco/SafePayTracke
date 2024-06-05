@@ -75,7 +75,7 @@ class SecurityController extends AbstractController
 
                 // Envoi du mail
                 $mail->send(
-                    'no-reply@safepaytracker.com',
+                    'no-reply@aroapartners.net',
                     $user->getEmail(),
                     'Réinitialisation de mot de passe',
                     'password_reset',

@@ -105,10 +105,38 @@
 						{% if is_granted('ROLE_GARDIEN') %}
 							<a href="{{ path('app_gardinage_index') }}" class="btn btn-warning btn-lg">Accéder à mon espace</a>
 						{% elseif is_granted('ROLE_ADMIN') %}
-							<a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace</a>
-						{% else %}
+							<a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace Admin</a>
+							<div class="container mt-4">
+								<div class="document-list">
+									{% for document in documents %}
+										<div class="document-item mb-3"> 
+											<p>{{ document.typeDocument }}</p>
+											<a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
+											{% if not loop.last %}
+												<hr/>
+											{% endif %}
+										</div>
+									{% endfor %}
+								</div>
+							</div>
+
+						{% elseif is_granted('ROLE_LOCATEUR') %}
 							<a href="{{ path('app_profile') }}" class="btn btn-primary btn-lg">Accéder à mon espace</a>
+							<table class="table mt-4">
+								<tbody>
+								{% for document in documents %}
+									<tr>
+										<td>{{ document.name }}</td>
+										<td>
+											<a href="{{ path('app_document_show', {'id': document.id}) }}">Télecharger</a>
+										</td>
+									</tr> 
+								{% endfor %}
+								</tbody>
+							</table>
 						{% endif %}
+					{% else %}
+							<a href="{{ path('app_logout') }}" class="btn btn-primary btn-lg">Déconnexion</a>
 					{% endif %}
 				</div>
 			</div>

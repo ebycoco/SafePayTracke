@@ -14,6 +14,7 @@
 			{% endif %}
 			{% if is_granted('ROLE_ADMIN') %}
 				<a class="btn btn-primary {{set_active_route('app_admin_index')}} {{set_active_route('app_admin_edit')}}" href="{{ path('app_admin_index')}}">Permission d'accès</a>
+				<a class="btn btn-primary {{set_active_route('app_admin_add_doc')}} {{set_active_route('app_admin_lis_doc')}}" href="{{ path('app_admin_lis_doc')}}">Ajouter un document</a>
 			{% endif %}
 			<a class="btn btn-primary {{set_active_route('modifier_profil')}}" href="{{ path('modifier_profil')}}">Modifier Profil</a>
 			<a class="btn btn-primary {{set_active_route('app_profile_pass_change')}}" href="{{ path('app_profile_pass_change')}}">Changer mot de passe</a>

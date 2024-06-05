@@ -22,7 +22,7 @@
                     {% endfor %}
                 {% endfor %}
                     <h2 class="font-22 text-center">Bienvenue !</h2>
-                    <p class="text-muted text-center mb-4">Connectez-vous pour continuer sur Safe Pay Tracker.</p>
+                    <p class="text-muted text-center mb-4">Connectez-vous pour continuer sur APTracker.</p>
                     <form method="post" class="form-horizontal">
                         {% if error %}
                             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
@@ -30,7 +30,7 @@
     
                         {% if app.user %}
                             <div class="mb-3">
-                                You are logged in as
+                                Vous être déjà connecter
                                 {{ app.user.username }},
                                 <a href="{{ path('app_logout') }}">Déconnection</a>
                             </div>
@@ -70,7 +70,7 @@
                     S'inscrire
                 </a>
             </p>
-            <p>© 2024 Sate Pay Tracker.
+            <p>© 2024 APTracker.
                 <i class="mdi mdi-heart text-danger"></i>
                 par Ebychoco</p>
         </div>
