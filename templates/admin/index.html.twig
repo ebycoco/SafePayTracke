@@ -16,8 +16,9 @@
                         <tr>
                             <th>Email</th>
                             <th>Roles</th>
-                            <th>Numéro Tel</th>
-                            <th>Nom De Societe</th>
+                            <th>Télephone</th>
+                            <th>Societe</th>
+                            <th>Compte vérifier</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -44,13 +45,24 @@
                                     <td>{{ user.numero }}</td>
                                     <td>{{ user.nomDeSociete }}</td>
                                     <td>
+                                    {% if user.isVerified =="1" %}
+                                        <span  class="badge bg-success"> Oui</span>
+                                    {% else %}
+                                        <span class="badge bg-danger"> Non</span>
+                                    {% endif %} 
+                                    </td>
+                                    <td>
                                         {% if app.user.id == user.id %}
                                             <button class="btn btn-warning" disabled>Impossible</button>
                                         {% else %}
                                             <div class="d-flex">
+                                            {% if user.isVerified == "0" %}
+                                                <button type="button" class="btn btn-secondary me-2" disabled> Attribuer role</button>
+                                            {% else %}
                                                 <a href="{{ path('app_admin_edit', {'id': user.id}) }}" class="btn btn-primary me-2">
                                                     Attribuer role
                                                 </a>
+                                            {% endif %}
                                                 {{ include('admin/_delete_form.html.twig') }}
                                             </div>
                                         {% endif %}

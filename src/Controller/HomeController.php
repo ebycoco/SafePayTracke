@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+
 class HomeController extends AbstractController
 {
     #[Route('/home', name: 'app_home', methods: ['GET'])]
@@ -33,6 +34,7 @@ class HomeController extends AbstractController
             'nombreUtilisateurs' => $nombreUtilisateurs,
             'payments' => $paymentsData ,
             'documents' => $documentRepository->findAll(),
+            'userRoles' => $this->getUser()->getRoles(),
         ]);
     }
 

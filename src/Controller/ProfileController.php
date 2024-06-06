@@ -18,20 +18,24 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 class ProfileController extends AbstractController
 {
 
-    #[Route('/profile', name: 'app_profile')]
+    #[Route('/profile', name: 'app_profile')] 
     public function profile(PaymentRepository $paymentRepository,Request $request): Response
     {
-        // Récupérer l'utilisateur connecté
+         // Récupérer l'utilisateur connecté
         $utilisateurConnecte = $this->getUser();
+        
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
         }
+
+        
         // Récupérer le numéro de la page à afficher
         $page = $request->query->getInt('page', 1); // Par défaut, la première page est affichée
 
@@ -61,6 +65,15 @@ class ProfileController extends AbstractController
         SendMailService $mail
     ):Response
     {
+         // Récupérer l'utilisateur connecté
+         $utilisateurConnecte = $this->getUser();
+        
+         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+         if (!$utilisateurConnecte) {
+             return $this->redirectToRoute('app_login');
+         }
+ 
+         
         $form = $this->createForm(ResetPasswordRequestFormType::class);
 
         $form->handleRequest($request);
@@ -115,8 +128,17 @@ class ProfileController extends AbstractController
         EntityManagerInterface $entityManager
         ): Response
     {
+        
         $user = $this->getUser(); // Récupérer l'utilisateur actuellement connecté
-        $utilisateurConnecte = $this->getUser();
+         // Récupérer l'utilisateur connecté
+         $utilisateurConnecte = $this->getUser();
+        
+         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+         if (!$utilisateurConnecte) {
+             return $this->redirectToRoute('app_login');
+         }
+ 
+         
         $NomDeSociete= $utilisateurConnecte->getNomDeSociete();
         $form = $this->createForm(UserModiType::class, $user);
 
@@ -146,6 +168,15 @@ class ProfileController extends AbstractController
     ): Response {
         // Obtenez l'utilisateur actuellement connecté
         $utilisateurConnecte = $this->getUser();
+        // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+        if (!$utilisateurConnecte) {
+            return $this->redirectToRoute('app_login');
+        }
+        // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
+        if (!$this->isGranted('ROLE_LOCATEUR')) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
+        }
+        
         $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
         $userId = $utilisateurConnecte->getId();
         // Récupérer les paiements de l'utilisateur connecté
@@ -307,6 +338,16 @@ class ProfileController extends AbstractController
         ): Response
     {
         $utilisateurConnecte = $this->getUser();
+        // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+        if (!$utilisateurConnecte) {
+            return $this->redirectToRoute('app_login');
+        }
+
+         // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
+        if (!$this->isGranted('ROLE_LOCATEUR')) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
+        }
+
         $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
 
         // Créer le formulaire en utilisant l'entité existante
@@ -369,6 +410,14 @@ class ProfileController extends AbstractController
         ): Response
     {
         $utilisateurConnecte = $this->getUser();
+        // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+        if (!$utilisateurConnecte) {
+            return $this->redirectToRoute('app_login');
+        }
+        // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
+        if (!$this->isGranted('ROLE_LOCATEUR')) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
+        }
         $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
 
         // Créer le formulaire en utilisant l'entité existante
@@ -433,6 +482,11 @@ class ProfileController extends AbstractController
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
         }
+        // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
+        if (!$this->isGranted('ROLE_LOCATEUR')) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
+        }
+        
         // Récupérer le numéro de la page à afficher
         $page = $request->query->getInt('page', 1); // Par défaut, la première page est affichée
         // Définir le nombre d'éléments par page
@@ -487,6 +541,7 @@ class ProfileController extends AbstractController
                 }
                 // Modifier la date pour obtenir le mois précédent
                 $dateMoisPrecedent = $dateMoisActuel->modify('first day of last month');
+
 
                 // Récupérer tous les utilisateurs ayant le rôle ROLE_LOCATEUR
                 $locateurs = $userRepository->findByRole('ROLE_LOCATEUR');

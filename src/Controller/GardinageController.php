@@ -116,12 +116,10 @@ class GardinageController extends AbstractController
         // Vérifier si le dernier paiement existe
         if ($dernierPaiement) {
             $montantRestant = $dernierPaiement->getMontantRestant();
-            
         } else {
             // Aucun paiement précédent trouvé, initialiser le montant restant à 0
             $montantRestant = 0;
         }
-        
 
         if ($dernierPaiement) {
             $solde = $dernierPaiement->getSolde();
@@ -136,9 +134,7 @@ class GardinageController extends AbstractController
         // Formater la date avec le nom du mois en français
         $dateFormatee = $formatter->format($date);
 
-
         // Afficher la date formatée
-
 
         if ($form->isSubmitted() && $form->isValid()) {
             $montantRecu = $form->getData()->getmontantRecu();

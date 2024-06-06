@@ -7,13 +7,13 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class UserEditRoleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // ->add('email')
             ->add('roles', ChoiceType::class, [
                 'choices' => [
                     'Admin' => 'ROLE_ADMIN',
@@ -24,10 +24,12 @@ class UserEditRoleType extends AbstractType
                 ],
                 'multiple' => true, // Si vous voulez sélectionner plusieurs rôles
                 'expanded' => true, // Si vous voulez afficher les options comme des cases à cocher
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Vous devez choisir au moins un rôle.',
+                    ]),
+                ],
             ])
-            //->add('password')
-            // ->add('numero')
-            // ->add('nomDeSociete')
         ;
     }
 

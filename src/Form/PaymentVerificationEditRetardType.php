@@ -7,28 +7,22 @@ use App\Entity\PaymentVerification;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class PaymentVerificationEditRetardType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('montantPrevu')
-            // ->add('montantRecu')
-            // ->add('typePaiement', ChoiceType::class, [
-            //     'choices' => [
-            //         'Paiement normal' => 'Normal',
-            //         'Paiement retard' => 'Retard',
-            //         'Paiement anticiper' => 'Anticiper',
-            //     ],
-            //     'placeholder'=> '-- Selectionner le type de paiement --',
-            // ])
-            // ->add('Payment', EntityType::class, [
-            //     'class' => Payment::class,
-            //     'choice_label' => 'id',
-            // ])
+            ->add('montantPrevu',NumberType::class,[
+                'constraints' => [
+                new Assert\NotBlank(['message' => 'Le montant prévu est obligatoire.']),
+                new Assert\Positive(['message' => 'Le montant doit être positif.']),
+            ],
+            'label' => 'Montant prévu'])
         ;
     }
 

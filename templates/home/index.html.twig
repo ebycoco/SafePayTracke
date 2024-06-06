@@ -7,139 +7,168 @@
 {% endblock %}
 
 {% block body %}
-	<div class="container-fluid">
-		<div class="row justify-content-center mt-4">
-			<div class="col-md-9">
-				<div class="card shadow">
-					<div class="card-body">
-						<h2 class="card-title text-center mb-4">Tableau récapitulatif des {{ pluralize(nombreUtilisateurs, 'Locataire')  }}</h2>
-						<div class="table-responsive">
-							<table class="table table-hover table-bordered">
-								<thead class="table-info">
-									<tr>
-										<th scope="col">Période de paiement</th>
-										<th scope="col">Locataire</th>
-										<th scope="col">Paiement validé</th>
-										<th scope="col">Paiement attendu</th>
-										<th scope="col">Date de paiement</th>
-										<th scope="col">État de paiement</th>
-										<th scope="col">Etat du compte</th>
-										<th scope="col">solde dû</th>
-									</tr>
-								</thead>
-								<tbody>
-									{% set trans_day_hash = {
-										'January': 'Janvier',
-										'February': 'Février',
-										'March': 'Mars',
-										'April': 'Avril',
-										'May': 'Mai',
-										'June': 'Juin',
-										'July': 'Juillet',
-										'August': 'Août',
-										'September': 'Septembre',
-										'October': 'Octobre',
-										'November': 'Novembre',
-										'December': 'Décembre'
-									} %}
+    <div class="container-fluid">
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-9">
+                {% if is_granted('ROLE_LOCATEUR') or is_granted('ROLE_GARDIEN') or is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+                <div class="card shadow">
+                    <div class="card-body">
+                            <h2 class="card-title text-center mb-4">Tableau récapitulatif des {{ pluralize(nombreUtilisateurs, 'Locataire')  }}</h2>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered">
+                                    <thead class="table-info">
+                                        <tr>
+                                            <th scope="col">Période de paiement</th>
+                                            <th scope="col">Locataire</th>
+                                            <th scope="col">Paiement validé</th>
+                                            <th scope="col">Paiement attendu</th>
+                                            <th scope="col">Date de paiement</th>
+                                            <th scope="col">Etat de paiement</th>
+                                            <th scope="col">Etat du compte</th>
+                                            <th scope="col">solde dû</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set trans_day_hash = {
+                                            'January': 'Janvier',
+                                            'February': 'Février',
+                                            'March': 'Mars',
+                                            'April': 'Avril',
+                                            'May': 'Mai',
+                                            'June': 'Juin',
+                                            'July': 'Juillet',
+                                            'August': 'Août',
+                                            'September': 'Septembre',
+                                            'October': 'Octobre',
+                                            'November': 'Novembre',
+                                            'December': 'Décembre'
+                                        } %}
 
-									{% if payments.data is not empty %}
-										{% for payment in payments.data %}
-											<tr>
-												<td>
-													{{ trans_day_hash[payment.datePaiement|date('F')] ~ ' ' ~ payment.datePaiement|date('Y') }}
-												</td>
-												<td>{{ payment.users.nomDeSociete }}</td>
-												<td>
-													<strong>{{ payment.montantPrevu - payment.montantRestant|default(0) }}</strong> F
-												</td>
-												<td><strong>{{ payment.montantRestant|default(0) }}</strong> F</td>
-												<td>{{ payment.datePaiement|date('d-m-Y') }}</td>
-												<td>
-													<span class="badge 
-														{% if payment.status == 'en attente' %}bg-primary
-														{% elseif payment.status == 'absent' %}bg-warning
-														{% elseif payment.status == 'Non payé' %}bg-danger
-														{% else %}bg-success{% endif %}">
-														{{ payment.status }}
-													</span>
-												</td>
-												
-												{% if payment.avancePaiement is empty %}
-													<td><strong>0</strong> F</td>
-												{% else %}
-													{% if payment.avancePaiement >=0 %}
-														<td class="bg-success"><strong>
-														{{ payment.avancePaiement }}</strong> F</td>
-													{% else %}
-														<td class="bg-danger"><strong>
-														{{ payment.avancePaiement }}</strong> F</td>
-													{% endif %}
-													
-												{% endif %}
-												
-												<td><strong>{{ payment.solde|default(0) }}</strong> F</td>
-											</tr>
-										{% endfor %}
-									{% else %}
-										<tr>
-											<td colspan="7" class="text-center">Pas de paiement</td>
-										</tr>
-									{% endif %}
-								</tbody>
-							</table>
-						</div>
+                                        {% if payments.data is not empty %}
+                                            {% for payment in payments.data %}
+                                                <tr>
+                                                    <td>{{ trans_day_hash[payment.datePaiement|date('F')] ~ ' ' ~ payment.datePaiement|date('Y') }}</td>
+                                                    <td>{{ payment.users.nomDeSociete }}</td>
+                                                    <td><strong>{{ payment.montantPrevu - payment.montantRestant|default(0) }}</strong> F</td>
+                                                    <td><strong>{{ payment.montantRestant|default(0) }}</strong> F</td>
+                                                    <td>{{ payment.datePaiement|date('d-m-Y') }}</td>
+                                                    <td>
+                                                        <span class="badge 
+                                                            {% if payment.status == 'en attente' %}bg-primary
+                                                            {% elseif payment.status == 'absent' %}bg-warning
+                                                            {% elseif payment.status == 'Non payé' %}bg-danger
+                                                            {% else %}bg-success{% endif %}">
+                                                            {{ payment.status }}
+                                                        </span>
+                                                    </td>
+                                                    {% if payment.avancePaiement is empty %}
+                                                        <td><strong>0</strong> F</td>
+                                                    {% else %}
+                                                        {% if payment.avancePaiement >=0 %}
+                                                            <td class="bg-success"><strong>{{ payment.avancePaiement }}</strong> F</td>
+                                                        {% else %}
+                                                            <td class="bg-danger"><strong>{{ payment.avancePaiement }}</strong> F</td>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                    <td><strong>{{ payment.solde|default(0) }}</strong> F</td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="7" class="text-center">Pas de paiement</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                    </div>
+                </div>
+				{% else %}
+				{% if app.user and app.user.isVerified %}
+					<div class="card shadow my-5 mx-auto" style="max-width: 600px; border-radius: 15px;">
+					<div class="card-body text-center">
+						<p class=" mb-4" style="font-size: 1.2rem;">Vous n'avez pas de rôle. Veuillez contacter l'administrateur pour vous attribuer un rôle.</p>
+						<a href="{{ path('app_logout') }}" class="btn btn-primary btn-lg" style="width: 50%;">Déconnexion</a>
 					</div>
 				</div>
-				{% if payments.pages > 1 %}
-					<div class="row justify-content-center mt-5">
-						<div class="col-md-10">
-							{% include 'partials/_pagination.html.twig' with {'path': 'app_home', 'pages': payments.pages, 'currentPage': payments.page} %}
-						</div>
+				{% else %}
+				<div class="card shadow my-5 mx-auto" style="max-width: 600px; border-radius: 15px;">
+					<div class="card-body text-center">
+						<p class=" mb-4" style="font-size: 1.2rem;">Votre compte n'est pas activé. Veuillez consulter votre boîte mail pour activer votre compte ou </p>
+						<a href="{{ path('resend_verif') }}" class="btn btn-primary btn-lg" style="width: 50%;">renvoyer le lien d'activation</a>
 					</div>
+				</div>
 				{% endif %}
-			</div>
-			<div class="col-md-3">
-				<div class="text-center mt-3">
-					{% if app.user and app.user.isVerified %}
-						{% if is_granted('ROLE_GARDIEN') %}
-							<a href="{{ path('app_gardinage_index') }}" class="btn btn-warning btn-lg">Accéder à mon espace</a>
-						{% elseif is_granted('ROLE_ADMIN') %}
-							<a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace Admin</a>
-							<div class="container mt-4">
-								<div class="document-list">
-									{% for document in documents %}
-										<div class="document-item mb-3"> 
-											<p>{{ document.typeDocument }}</p>
-											<a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
-											{% if not loop.last %}
-												<hr/>
-											{% endif %}
-										</div>
-									{% endfor %}
-								</div>
-							</div>
+				
 
-						{% elseif is_granted('ROLE_LOCATEUR') %}
-							<a href="{{ path('app_profile') }}" class="btn btn-primary btn-lg">Accéder à mon espace</a>
-							<table class="table mt-4">
-								<tbody>
-								{% for document in documents %}
-									<tr>
-										<td>{{ document.name }}</td>
-										<td>
-											<a href="{{ path('app_document_show', {'id': document.id}) }}">Télecharger</a>
-										</td>
-									</tr> 
-								{% endfor %}
-								</tbody>
-							</table>
-						{% endif %}
-					{% else %}
-							<a href="{{ path('app_logout') }}" class="btn btn-primary btn-lg">Déconnexion</a>
+				{% endif %}
+				{% if is_granted('ROLE_LOCATEUR') or is_granted('ROLE_GARDIEN') or is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+					{% if payments.pages > 1 %}
+						<div class="row justify-content-center mt-5">
+							<div class="col-md-10">
+								{% include 'partials/_pagination.html.twig' with {'path': 'app_home', 'pages': payments.pages, 'currentPage': payments.page} %}
+							</div>
+						</div>
 					{% endif %}
-				</div>
-			</div>
-		</div>
-	</div>
+				{% endif %}
+            </div>
+			
+            <div class="col-md-3">
+                <div class="text-center mt-3">
+                    {% if app.user and app.user.isVerified %}
+                        {% if is_granted('ROLE_SUPER_ADMIN') %}
+						<a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace Admin</a>
+                            <div class="container mt-4">
+                                <div class="document-list">
+                                    {% for document in documents %}
+                                        <div class="document-item mb-3">
+                                            <p>{{ document.typeDocument }}</p>
+                                            <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
+                                            {% if not loop.last %}
+                                                <hr/>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% elseif is_granted(' ROLE_GARDIEN') %}
+                            <a href="{{ path('app_gardinage_index') }}" class="btn btn-warning btn-lg">Accéder à mon espace</a>
+                        {% elseif is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace Admin</a>
+                            <div class="container mt-4">
+                                <div class="document-list">
+                                    {% for document in documents %}
+                                        <div class="document-item mb-3">
+                                            <p>{{ document.typeDocument }}</p>
+                                            <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
+                                            {% if not loop.last %}
+                                                <hr/>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% elseif is_granted('ROLE_LOCATEUR') %}
+                            <a href="{{ path('app_profile') }}" class="btn btn-primary btn-lg">Accéder à mon espace</a>
+                            <div class="container mt-4">
+                                <div class="document-list">
+                                    {% for document in documents %}
+                                        <div class="document-item mb-3">
+                                            <p>{{ document.typeDocument }}</p>
+                                            <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
+                                            {% if not loop.last %}
+                                                <hr/>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ path('app_logout') }}" class="btn btn-primary btn-lg">Déconnexion</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

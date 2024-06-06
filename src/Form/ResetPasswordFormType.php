@@ -6,6 +6,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ResetPasswordFormType extends AbstractType
 {
@@ -14,6 +16,14 @@ class ResetPasswordFormType extends AbstractType
         $builder
             ->add('password', PasswordType::class, [
                 'label' => 'Entrez votre mot de passe',
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer une adresse email',
+                    ]),
+                    new Assert\Email([
+                        'message' => 'Veuillez entrer une adresse email valide',
+                    ]),
+                ],
                 'attr' => [
                     'class' => 'form-control'
                 ]
