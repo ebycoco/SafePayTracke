@@ -164,170 +164,206 @@ class ProfileController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         PaymentRepository $paymentRepository,
-        UserRepository $userRepository,
-    ): Response {
-        // Obtenez l'utilisateur actuellement connecté
-        $utilisateurConnecte = $this->getUser();
-        // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
-        if (!$utilisateurConnecte) {
-            return $this->redirectToRoute('app_login');
-        }
-        // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
-        if (!$this->isGranted('ROLE_LOCATEUR')) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
-        }
-        
-        $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
-        $userId = $utilisateurConnecte->getId();
-        // Récupérer les paiements de l'utilisateur connecté
-        $paiementsByUser = $paymentRepository->findPaymentsByUser($userId);
-        $findPaymentsByUserAll = $paymentRepository->findPaymentsByUserAll($userId);
-        // Créer un nouveau paiement et le formulaire associé
-        $payment = new Payment();
-        $form = $this->createForm(PaymentType::class, $payment);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Commence une transaction
-            $entityManager->beginTransaction();
-            try {
-                // Récupérer les données du formulaire
-                $montantAPayer = $form->getData()->getMontantAPayer();
-                $datePaiement = $form->getData()->getDatePaiement();
-                $moisActuel = $datePaiement->format('m');
-                $mois = $datePaiement->format('F');
-                $annee = $datePaiement->format('Y');
-                $typePaiement = $form->getData()->getTypePaiement();
-                // Récupérer les paiements de l'utilisateur pour le mois sélectionné
-                $paiements = $paymentRepository->findPaymentsByUserAndMonth($userId, $annee, $moisActuel);
-                $solde = empty($paiements) ? null : $paiements->getSolde();
-                // Vérification et enregistrement des paiements
-                if ($typePaiement == "Normal") {
+        UserRepository $userRepository
+    ):Response
+    {
+    // Obtenez l'utilisateur actuellement connecté
+    $utilisateurConnecte = $this->getUser();
+    // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+    if (!$utilisateurConnecte) {
+        return $this->redirectToRoute('app_login');
+    }
+    // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
+    if (!$this->isGranted('ROLE_LOCATEUR')) {
+        throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
+    }
 
-                    $dateDuJour = date("F Y");
-                    $dateDuPaiement = $datePaiement->format('F Y');
+    $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
+    $userId = $utilisateurConnecte->getId();
+    // Récupérer les paiements de l'utilisateur connecté
+    $paiementsByUser = $paymentRepository->findPaymentsByUser($userId);
+    $findPaymentsByUserAll = $paymentRepository->findPaymentsByUserAll($userId);
+    // Créer un nouveau paiement et le formulaire associé
+    $payment = new Payment();
+    $form = $this->createForm(PaymentType::class, $payment);
+    $form->handleRequest($request);
 
-                    // Mapping des mois à leurs positions numériques dans l'année
-                    $mois = [
-                        'january' => 1,
-                        'february' => 2,
-                        'march' => 3,
-                        'april' => 4,
-                        'may' => 5,
-                        'june' => 6,
-                        'july' => 7,
-                        'august' => 8,
-                        'september' => 9,
-                        'october' => 10,
-                        'november' => 11,
-                        'december' => 12
-                    ];
+    if ($form->isSubmitted() && $form->isValid()) {
+        // Commence une transaction
+        $entityManager->beginTransaction();
+        try {
+            // Récupérer les données du formulaire
+            $montantAPayer = $form->getData()->getMontantAPayer();
+            $datePaiement = $form->getData()->getDatePaiement();
 
-                    // Extraire seulement le mois de chaque date
-                    list($moisDuPaiement) = explode(" ", strtolower($dateDuPaiement));
-                    list($moisDuJour) = explode(" ", strtolower($dateDuJour));
+            $moisActuel = $datePaiement->format('m');
+            $mois = $datePaiement->format('F');
+            $annee = $datePaiement->format('Y');
+            
 
-                    if ($mois[$moisDuPaiement] != $mois[$moisDuJour]) {
-                        $this->addFlash('warning', "Vous ne pouvez pas fait un paiement Normal car vous n'avez pas selectionné ce mois de " .$dateDuJour .". Veuillez choisir autre type de paiement");
-                        return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
-                    }
-                    $this->handleNormalPayment($entityManager, $paymentRepository, $userRepository, $paiements, $payment, $montantAPayer, $userId, $solde, $moisActuel, $annee, $mois);
-                } elseif ($typePaiement == "Retard") {
+            
 
-                    $dateDuJour = date("F Y");
-                    $dateDuPaiement = $datePaiement->format('F Y');
+            $typePaiement = $form->getData()->getTypePaiement();
+            // Récupérer les paiements de l'utilisateur pour le mois sélectionné
+            $paiements = $paymentRepository->findPaymentsByUserAndMonth($userId, $annee, $moisActuel);
+            $solde = empty($paiements) ? null : $paiements->getSolde();
 
-                    // Mapping des mois à leurs positions numériques dans l'année
-                    $mois = [
-                        'january' => 1,
-                        'february' => 2,
-                        'march' => 3,
-                        'april' => 4,
-                        'may' => 5,
-                        'june' => 6,
-                        'july' => 7,
-                        'august' => 8,
-                        'september' => 9,
-                        'october' => 10,
-                        'november' => 11,
-                        'december' => 12
-                    ];
+            // Vérification et enregistrement des paiements
+            if ($typePaiement == "Normal") {
+                $dateDuJour = date("F Y");
+                $dateDuPaiement = $datePaiement->format('F Y');
 
-                    // Extraire seulement le mois de chaque date
-                    list($moisDuPaiement) = explode(" ", strtolower($dateDuPaiement));
-                    list($moisDuJour) = explode(" ", strtolower($dateDuJour));
+                // Mapping des mois à leurs positions numériques dans l'année
+                $mois = [
+                    'january' => 1,
+                    'february' => 2,
+                    'march' => 3,
+                    'april' => 4,
+                    'may' => 5,
+                    'june' => 6,
+                    'july' => 7,
+                    'august' => 8,
+                    'september' => 9,
+                    'october' => 10,
+                    'november' => 11,
+                    'december' => 12
+                ];
 
-                    if ($mois[$moisDuPaiement] == $mois[$moisDuJour]) {
-                        $this->addFlash('warning', "Vous ne pouvez pas payé un retard car nous somme déja dans le mois de " .$dateDuPaiement .". Veuillez selectionner autre mois");
-                        return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
-                    }elseif (($mois[$moisDuPaiement] > $mois[$moisDuJour])) {
-                        $this->addFlash('warning', "Vous ne pouvez pas payé un retard pour ce mois de " .$dateDuPaiement ." car ce mois n'est pas encore arrivé. Veuillez selectionner autre type de paiement");
-                        return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
-                    }else {
-                    $this->handleLatePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $mois);
-                    }
+                // Extraire seulement le mois de chaque date
+                list($moisDuPaiement) = explode(" ", strtolower($dateDuPaiement));
+                list($moisDuJour) = explode(" ", strtolower($dateDuJour));
 
-                } elseif ($typePaiement == "Anticiper") {
-                    $dateDuJour = date("F Y");
-                    $dateDuPaiement = $datePaiement->format('F Y');
+                if ($mois[$moisDuPaiement] != $mois[$moisDuJour]) {
+                    $this->addFlash('warning', "Vous ne pouvez pas fait un paiement Normal car vous n'avez pas selectionné ce mois de " . $dateDuJour . ". Veuillez choisir autre type de paiement");
+                    return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+                }
+                $this->handleNormalPayment($entityManager, $paymentRepository, $userRepository, $paiements, $payment, $montantAPayer, $userId, $solde, $moisActuel, $annee, $mois);
+            } elseif ($typePaiement == "Retard") {
+                $dateDuJour = date("F Y");
+                $dateDuPaiement = $datePaiement->format('F Y');
 
-                    // Mapping des mois à leurs positions numériques dans l'année
-                    $mois = [
-                        'january' => 1,
-                        'february' => 2,
-                        'march' => 3,
-                        'april' => 4,
-                        'may' => 5,
-                        'june' => 6,
-                        'july' => 7,
-                        'august' => 8,
-                        'september' => 9,
-                        'october' => 10,
-                        'november' => 11,
-                        'december' => 12
-                    ];
+                // Mapping des mois à leurs positions numériques dans l'année
+                $mois = [
+                    'january' => 1,
+                    'february' => 2,
+                    'march' => 3,
+                    'april' => 4,
+                    'may' => 5,
+                    'june' => 6,
+                    'july' => 7,
+                    'august' => 8,
+                    'september' => 9,
+                    'october' => 10,
+                    'november' => 11,
+                    'december' => 12
+                ];
 
-                    // Extraire seulement le mois de chaque date
-                    list($moisDuPaiement) = explode(" ", strtolower($dateDuPaiement));
-                    list($moisDuJour) = explode(" ", strtolower($dateDuJour));
+                // Extraire seulement le mois de chaque date
+                list($moisDuPaiement) = explode(" ", strtolower($dateDuPaiement));
+                list($moisDuJour) = explode(" ", strtolower($dateDuJour));
 
-                    $lastNonNullSolde = null;
-
-                    // Parcourir les objets Payment pour trouver le dernier solde non nul
-                    foreach ($findPaymentsByUserAll as $payment) {
-                        $solde = $payment->getSolde(); // Assurez-vous que la méthode getSolde() existe dans votre classe Payment
-                        if ($solde !== null) {
-                            $lastNonNullSolde = $solde;
+                if ($mois[$moisDuPaiement] == $mois[$moisDuJour]) {
+                    $this->addFlash('warning', "Vous ne pouvez pas payé un retard car nous somme déjà dans le mois de " . $dateDuPaiement . ". Veuillez sélectionner un autre mois");
+                    return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+                } elseif (($mois[$moisDuPaiement] > $mois[$moisDuJour])) {
+                    $this->addFlash('warning', "Vous ne pouvez pas payé un retard pour ce mois de " . $dateDuPaiement . " car ce mois n'est pas encore arrivé. Veuillez sélectionner un autre type de paiement");
+                    return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+                } else {
+                    $retardMois = $paymentRepository->findPayemntMoisSelectionne($userId, $annee, $moisActuel);
+                    if (!empty($retardMois)) {
+                        $payment = $retardMois[0]; // On prend le premier élément du tableau
+                        $paymentId = $payment->getId(); // On accède à l'id de l'objet Payment
+                        $moisPr = $payment->getDatePaiement()->format('F');
+                    
+                        // Tableau associatif pour mapper les mois en anglais aux mois en français
+                        $moisMapping = [
+                            "January" => "de Janvier",
+                            "February" => "de Février",
+                            "March" => "de Mars",
+                            "April" => "d'Avril",
+                            "May" => "de Mai",
+                            "June" => "de Juin",
+                            "July" => "de Juillet",
+                            "August" => "d'Août",
+                            "September" => "de Septembre",
+                            "October" => "d'Octobre",
+                            "November" => "de Novembre",
+                            "December" => "de Décembre"
+                        ];
+                    
+                        // Utilisation du tableau pour obtenir le mois en français
+                        if (array_key_exists($moisPr, $moisMapping)) {
+                            $moisFlash = $moisMapping[$moisPr];
+                            $this->addFlash('warning', "Veuillez effectuer votre retard " . $moisFlash . " ici.");
+                            return $this->redirectToRoute('app_retard_paiement', ["id"=>$paymentId], Response::HTTP_SEE_OTHER);
                         }
                     }
-                    if ($mois[$moisDuPaiement] == $mois[$moisDuJour]) {
-                        $this->addFlash('warning', "Vous ne pouvez pas anticiper car nous somme déja dans le mois de " .$dateDuPaiement .". Veuillez selectionner autre mois");
-                        return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
-                    }elseif ($mois[$moisDuPaiement] < $mois[$moisDuJour]) {
-                        $this->addFlash('warning', "Vous ne pouvez pas anticiper ce mois de " .$dateDuPaiement ." car ce mois est passé. Veuillez selectionner autre type de paiement");
-                        return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
-                    }else {
-                        $this->handleAdvancePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId,$moisActuel,$annee,$lastNonNullSolde);
+                    
+                    $this->handleLatePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $mois);
+                }
+            } elseif ($typePaiement == "Anticiper") {
+                $dateDuJour = date("F Y");
+                $dateDuPaiement = $datePaiement->format('F Y');
+
+                // Mapping des mois à leurs positions numériques dans l'année
+                $mois = [
+                    'january' => 1,
+                    'february' => 2,
+                    'march' => 3,
+                    'april' => 4,
+                    'may' => 5,
+                    'june' => 6,
+                    'july' => 7,
+                    'august' => 8,
+                    'september' => 9,
+                    'october' => 10,
+                    'november' => 11,
+                    'december' => 12
+                ];
+
+                // Extraire seulement le mois de chaque date
+                list($moisDuPaiement) = explode(" ", strtolower($dateDuPaiement));
+                list($moisDuJour) = explode(" ", strtolower($dateDuJour));
+
+                $lastNonNullSolde = null;
+
+                // Parcourir les objets Payment pour trouver le dernier solde non nul
+                foreach ($findPaymentsByUserAll as $payment) {
+                    $solde = $payment->getSolde(); // Assurez-vous que la méthode getSolde() existe dans votre classe Payment
+                    if ($solde !== null) {
+                        $lastNonNullSolde = $solde;
                     }
                 }
-                // Valider la transaction
-                $entityManager->commit();
-                return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
 
-            } catch (\Exception $e) {
-                // Annuler la transaction en cas d'erreur
-                $entityManager->rollback();
-                $this->addFlash('danger', "Une erreur est survenue : " . $e->getMessage());
-                return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+                if ($mois[$moisDuPaiement] == $mois[$moisDuJour]) {
+                    $this->addFlash('warning', "Vous ne pouvez pas anticiper car nous somme déjà dans le mois de " . $dateDuPaiement . ". Veuillez sélectionner un autre mois");
+                    return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+                } elseif ($mois[$moisDuPaiement] < $mois[$moisDuJour]) {
+                    $this->addFlash('warning', "Vous ne pouvez pas anticiper ce mois de " . $dateDuPaiement . " car ce mois est passé. Veuillez sélectionner un autre type de paiement");
+                    return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+                } else {
+                    $this->handleAdvancePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $lastNonNullSolde);
+                }
             }
+            // Valider la transaction
+            $entityManager->commit();
+            return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+        } catch (\Exception $e) {
+            // Annuler la transaction en cas d'erreur
+            $entityManager->rollback();
+            $this->addFlash('danger', "Une erreur est survenue : " . $e->getMessage());
+            return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
         }
+    }
 
-        return $this->render('profile/paiement.html.twig', [
-            'payment' => $payment,
-            'NomDeSociete' => $NomDeSociete,
-            'paiementsByUser' => $paiementsByUser,
-            'findPaymentsByUserAll' => $findPaymentsByUserAll,
-            'form' => $form,
-        ]);
+    return $this->render('profile/paiement.html.twig', [
+        'payment' => $payment,
+        'NomDeSociete' => $NomDeSociete,
+        'paiementsByUser' => $paiementsByUser,
+        'findPaymentsByUserAll' => $findPaymentsByUserAll,
+        'form' => $form,
+    ]); 
+
     }
 
     #[Route('/paiement/{id}/edit', name: 'app_edit_paiement')]
@@ -376,6 +412,7 @@ class ProfileController extends AbstractController
                 $payment->setMontantAPayer($montantAPayerNouveau);
                 $payment->setMontantSaisir($montantAPayer);
                 $payment->setVerifier(false);
+                $payment->setStatus("en attente");
                 $payment->setTypePaiement("Retard");
                 $entityManager->flush();
 
@@ -407,41 +444,39 @@ class ProfileController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         Payment $payment
-        ): Response
-    {
+    ): Response {
         $utilisateurConnecte = $this->getUser();
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
         }
+
         // Vérifier si l'utilisateur a le rôle 'ROLE_LOCATEUR'
         if (!$this->isGranted('ROLE_LOCATEUR')) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette page.');
         }
+
         $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
 
         // Créer le formulaire en utilisant l'entité existante
-        // $payments = new Payment();
         $form = $this->createForm(PaymentRetardEditType::class, $payment);
         $form->handleRequest($request);
         $montantRestant = $payment->getMontantRestant();
+        
 
-        // dd($payment);
-
-        // Début de la transaction
-        $entityManager->beginTransaction();
-
-        try {
-            if ($form->isSubmitted() && $form->isValid()) {
-                $montantAPayer = $form->getData()->getMontantAPayer();
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                $montantAPayer = $form->get('montantAPayer')->getData();
                 $totalMontantPayer = $payment->getTotalMontantPayer() + $montantAPayer;
                 $montantPayerPrecedent = $payment->getMontantPrevu() - $montantRestant;
                 $montantAPayerNouveau = $montantPayerPrecedent + $montantAPayer;
+
                 // Vérifier si le montant est trop élevé
                 if ($montantAPayer > $montantRestant) {
                     $this->addFlash('warning', 'Attention, le montant renseigné est trop élevé.');
                     return $this->redirectToRoute('app_paiement', [], Response::HTTP_SEE_OTHER);
                 }
+
                 // Mettre à jour les informations du paiement
                 $payment->setTotalMontantPayer($totalMontantPayer);
                 $payment->setMontantAPayer($montantAPayerNouveau);
@@ -450,26 +485,21 @@ class ProfileController extends AbstractController
                 $payment->setVisibilite(true);
                 $payment->setStatus("en attente");
                 $payment->setTypePaiement("Retard");
-                $entityManager->flush();
 
-                // Valider la transaction
-                $entityManager->commit();
+                $entityManager->flush();
 
                 $this->addFlash('success', 'Votre paiement a été ajouté avec succès.');
                 return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                // En cas d'erreur, annuler la transaction et afficher un message d'erreur
+                $this->addFlash('danger', 'Une erreur est survenue lors de l\'enregistrement du paiement : ' . $e->getMessage());
             }
+        }
 
-            // Définir le champ MontantAPayer à null avant de rendre le formulaire
-            $form->get('montantAPayer')->setData(null);
-        } catch (\Exception $e) {
-            // En cas d'erreur, annuler la transaction et afficher un message d'erreur
-            $entityManager->rollback();
-            $this->addFlash('error', 'Une erreur est survenue lors de l\'enregistrement du paiement : ' . $e->getMessage());
-        } 
         return $this->render('profile/retard_paiement.html.twig', [
             'payment' => $payment,
             'NomDeSociete' => $NomDeSociete,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 

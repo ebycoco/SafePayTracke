@@ -10,7 +10,6 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: '`Payment`')]
 
@@ -39,12 +38,7 @@ class Payment
     #[Vich\UploadableField(mapping: 'recu', fileNameProperty: 'recuDePaiement')]
     private ?File $imageFile = null;
 
-    #[ORM\Column (nullable: true,length: 255)]
-    #[Assert\File(
-        maxSize: '1024k',
-        mimeTypes: ['image/jpeg', 'image/png'],
-        mimeTypesMessage: 'Veuillez télécharger une image valide (JPEG ou PNG).'
-    )]
+    #[ORM\Column (nullable: true,length: 255)] 
     private ?string $recuDePaiement = null;
 
     #[ORM\Column(nullable: true)]

@@ -42,7 +42,8 @@ class PaymentType extends AbstractType
                 ]
             ]) 
             ->add('datePaiement', null, [
-                'widget' => 'single_text'
+                'widget' => 'single_text',
+                'label' => 'Date de la période de paiement'
             ])
             ->add('typePaiement', ChoiceType::class, [
                 'choices' => [

@@ -34,7 +34,8 @@ class PaymentRetardEditType extends AbstractType
                     new Assert\File([
                         'maxSize' => '1024k',
                         'mimeTypes' => ['image/jpeg', 'image/png'],
-                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG ou PNG).'
+                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG ou PNG).',
+                        'notFoundMessage' => 'Le fichier n\'a pas été trouvé.' // Ajoutez ce message pour plus de clarté
                     ])
                 ],
                 'attr' => [

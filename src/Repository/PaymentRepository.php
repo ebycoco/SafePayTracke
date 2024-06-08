@@ -173,6 +173,21 @@ class PaymentRepository extends ServiceEntityRepository
         return  $qb->getQuery()->getOneOrNullResult();
     }
 
+
+    public function findPayemntMoisSelectionne($userId,$year, $month)
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->andWhere('p.users = :user') // Assurez-vous que l'alias 'p.user' correspond à votre mappage d'entité
+            ->andWhere("YEAR(p.datePaiement) = :year") // Utilisez le bon nom de champ pour 'datePayment'
+            ->andWhere("MONTH(p.datePaiement) = :month")
+            ->setParameter('user', $userId)
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->orderBy('p.datePaiement', 'DESC');
+        return  $qb->getQuery()->getResult();
+    }
+
     public function findPaymentsByUser($userId)
     {
         $qb = $this->createQueryBuilder('p');
