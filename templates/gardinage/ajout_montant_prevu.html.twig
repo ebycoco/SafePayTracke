@@ -2,7 +2,7 @@
 
 {% block title %}Gardinage{% endblock %}
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset("assets/css/profile.css") }}">
+    <link rel="stylesheet" href="{{ asset("assets/css/gardinage.css") }}">
 {% endblock %}
 
 {% block body %}
@@ -18,7 +18,7 @@
                                 <th scope="col">Période de paiement</th>
                                 <th scope="col">Locataire</th>
                                 <th scope="col">Montant prévu</th>
-                                <th scope="col">Montant valdé</th>
+                                <th scope="col">Montant payé</th>
                                 <th scope="col">Etat de paiement</th>
                                 <th scope="col">Action</th>
                             </tr>
@@ -46,54 +46,47 @@
                                 </td>
                                 <td>{{ payment.users.nomDeSociete }}</td>
                                 {% if payment.paymentVerifications is empty %}
-                                    <td>
-                                    {% if payment.montantPrevu is empty %}
-                                        Pas encore
-                                    {% else %}
-                                        {{ payment.montantPrevu|number_format(0, ',', ' ') }} (Fcfa)
-                                    {% endif %}
-                                    </td>
+                                    <td>Pas encore</td>
                                 {% else %}
-                                    <td>{{ payment.montantPrevu|number_format(0, ',', ' ') }} (Fcfa)</td>
+                                    <td>{{ payment.montantPrevu }} (Fcfa)</td>
                                 {% endif %}
                                 <td>
                                     {% if payment.montantRestant is empty %}
-                                        <strong>{{ payment.montantAPayer|number_format(0, ',', ' ') }}</strong> F
+                                        <strong>{{ payment.montantAPayer }}</strong> F
                                     {% else %}
-                                        <strong>{{ (payment.montantPrevu - payment.montantRestant)|number_format(0, ',', ' ') }}</strong> F
+                                        <strong>{{ payment.montantPrevu - payment.montantRestant }}</strong> F
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if payment.status == 'en attente' %}
                                         <span class="badge bg-primary">{{ payment.status }}</span>
-                                    {% elseif payment.status == 'Payé' %}
+                                    {% elseif payment.status == 'payé' %}
                                         <span class="badge bg-success">{{ payment.status }}</span>
-                                    {% elseif payment.status == 'Partiel' %}
+                                    {% elseif payment.status == 'partiel' %}
                                         <span class="badge bg-warning">{{ payment.status }}</span>
-                                    {% elseif payment.status == 'Non payé' %}
+                                    {% elseif payment.status == 'non payé' %}
                                         <span class="badge bg-danger">{{ payment.status }}</span>
-                                        {% elseif payment.status == 'absent' %}
+                                    {% elseif payment.status == 'absent' %}
                                         <span class="badge bg-info">{{ payment.status }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if payment.status == 'en attente' %}
                                         <a href="{{ path('app_gardinage_verifier', {'id': payment.id}) }}" class="btn btn-success btn-sm">
-                                            <i class="fas fa-check"></i> 
-                                            Verifier
+                                            <i class="fas fa-check"></i> Verifier
                                         </a>
                                     {% else %}
                                         {% if payment.montantPrevu == payment.montantAPayer %}
                                             {% if payment.montantRestant == 0 %}
-                                                {% if payment.montantRestant == 'Non payé' %} 
+                                                {% if payment.status == 'Non payé' %}
                                                     <a href="{{ path('app_gardinage_ajouterMontantPrevu', {'id': payment.id}) }}" class="btn btn-info btn-sm">
                                                         <i class="fas fa-plus"></i> Ajout montant prévu
                                                     </a>
                                                 {% else %}
-                                                    <a href="#" class="btn btn-danger btn-sm btn-hide" data-id="{{ payment.id }}">
-                                                        <i class="fas fa-eye-slash"></i> Masquer
+                                                    <a href="#" class="btn btn-info btn-sm btn-hide" data-id="{{ payment.id }}">
+                                                        <i class="fas fa-eye"></i> Restaurer
                                                     </a>
-                                                {% endif %} 
+                                                {% endif %}
                                             {% elseif payment.IsVerifier == false %}
                                                 <a href="{{ path('app_gardinage_verifier_nouveau', {'id': payment.id}) }}" class="btn btn-success btn-sm">
                                                     <i class="fas fa-check"></i> Verifier nouveau
@@ -105,10 +98,6 @@
                                             <a href="{{ path('app_gardinage_verifier_nouveau', {'id': payment.id}) }}" class="btn btn-success btn-sm">
                                                 <i class="fas fa-check"></i> Verifier nouveau
                                             </a>
-                                        {% elseif payment.montantRestant is empty %}
-                                                    <a href="{{ path('app_gardinage_ajouterMontantPrevu', {'id': payment.id}) }}" class="btn btn-info btn-sm">
-                                                        <i class="fas fa-plus"></i> Ajout montant prévu
-                                                    </a>
                                         {% else %}
                                             <button class="btn btn-info btn-sm" disabled>En attende</button>
                                         {% endif %}
@@ -119,7 +108,7 @@
                         </tbody>
                     </table>
                 </div>
-                {% set path = 'app_gardinage_index' %}
+                {% set path = 'app_gardinage_history' %}
                 {% set pages = payments.pages %}
                 {% set currentPage = payments.page %}
                 <div class="row justify-content-center mt-2">
@@ -136,7 +125,7 @@
             button.addEventListener('click', function(event) {
                 event.preventDefault();
                 const paymentId = this.dataset.id;
-                fetch(`/gardinage/payment/hide/${paymentId}`, {
+                fetch(`/gardinage/payment/voir/${paymentId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

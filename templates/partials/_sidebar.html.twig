@@ -9,8 +9,15 @@
 				<a class="btn btn-primary {{set_active_route('app_mes_retard_paiement')}} " href="{{ path('app_mes_retard_paiement') }}">Mes retard</a>
 			{% endif %}
 			{% if is_granted('ROLE_GARDIEN') %}
-				<a class="btn btn-primary {{set_active_route('app_gardinage_index')}} {{set_active_route('app_gardinage_verifier')}}" href="{{ path('app_gardinage_index') }}">Vérification des Paiements</a>
-				<a class="btn btn-primary {{set_active_route('app_gardinage_history')}}" href="{{ path('app_gardinage_history') }}">History des Paiements</a>
+			<a class="btn btn-primary {{set_active_route('app_gardinage_nouvelle')}}" href="{{ path('app_gardinage_nouvelle') }}">
+				Nouvelle Paiements
+				{% if paymentsNombre > 0 %}
+					<i class="fas fa-bell"> {{paymentsNombre}}</i>
+				{% endif %}
+				</a>
+				<a class="btn btn-primary {{set_active_route('app_gardinage_index')}} {{set_active_route('app_gardinage_verifier')}}" href="{{ path('app_gardinage_index') }}">Vérification des Paiements 
+				</a>
+				<a class="btn btn-primary {{set_active_route('app_gardinage_history')}}" href="{{ path('app_gardinage_history') }}">Historique des Paiements</a>
 			{% endif %}
 			{% if is_granted('ROLE_ADMIN') %}
 				<a class="btn btn-primary {{set_active_route('app_admin_index')}} {{set_active_route('app_admin_edit')}}" href="{{ path('app_admin_index')}}">Permission d'accès</a>

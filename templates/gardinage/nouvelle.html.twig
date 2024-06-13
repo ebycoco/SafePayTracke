@@ -18,7 +18,7 @@
                                 <th scope="col">Période de paiement</th>
                                 <th scope="col">Locataire</th>
                                 <th scope="col">Montant prévu</th>
-                                <th scope="col">Montant valdé</th>
+                                <th scope="col">Montant saisir</th>
                                 <th scope="col">Etat de paiement</th>
                                 <th scope="col">Action</th>
                             </tr>
@@ -48,20 +48,18 @@
                                 {% if payment.paymentVerifications is empty %}
                                     <td>
                                     {% if payment.montantPrevu is empty %}
-                                        Pas encore
+                                       <span class="badge bg-primary"> Non définit</span>
                                     {% else %}
-                                        {{ payment.montantPrevu|number_format(0, ',', ' ') }} (Fcfa)
+                                        {{ payment.montantPrevu|number_format(0, ',', ' ') }} F
                                     {% endif %}
                                     </td>
                                 {% else %}
-                                    <td>{{ payment.montantPrevu|number_format(0, ',', ' ') }} (Fcfa)</td>
+                                    <td>
+                                    {{ payment.montantPrevu|number_format(0, ',', ' ') }} F
+                                    </td>
                                 {% endif %}
                                 <td>
-                                    {% if payment.montantRestant is empty %}
-                                        <strong>{{ payment.montantAPayer|number_format(0, ',', ' ') }}</strong> F
-                                    {% else %}
-                                        <strong>{{ (payment.montantPrevu - payment.montantRestant)|number_format(0, ',', ' ') }}</strong> F
-                                    {% endif %}
+                                    <strong>{{ payment.montantAPayer|number_format(0, ',', ' ') }}</strong> F
                                 </td>
                                 <td>
                                     {% if payment.status == 'en attente' %}

@@ -29,10 +29,12 @@ class HomeController extends AbstractController
         // Récupérer le nombre total d'utilisateurs qui ont pour role ROLE_LOCATEUR
         $role = 'ROLE_LOCATEUR';
         $nombreUtilisateurs = $userRepository->countUsersByRole($role);
-        $paymentsData  = $paymentRepository->findPaymentPaginated($page,4);
+        $paymentsData  = $paymentRepository->findPaymentPaginated($page,8);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         return $this->render('home/index.html.twig', [
             'nombreUtilisateurs' => $nombreUtilisateurs,
-            'payments' => $paymentsData ,
+            'paymentsNombre' => $paymentsNombre,
+            'payments' => $paymentsData,
             'documents' => $documentRepository->findAll(),
             'userRoles' => $this->getUser()->getRoles(),
         ]);

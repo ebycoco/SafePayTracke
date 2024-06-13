@@ -12,13 +12,16 @@
 			<div class="p-3 mb-4 bg-body-tertiary rounded-3">
 				<div class="container-fluid py-2">
 					<h1 class="display-5 fw-bold">{{ payment.users.nomDeSociete }}</h1>
-				{% if solde is not empty or solde > 0 %}
-					<P>Vous doit un montant de : <strong class="h5 text-warning"> {{solde}} </strong> F cfa</P>
+				{% if solde is empty %}
+				{% elseif solde == 0 %}
+				<P>Vous doit un montant de : <strong class="h5 text-warning"> {{payment.montantSaisir|number_format(0, ',', ' ')}} </strong> Fcfa pour ce mois du <strong>{{ mois }}</strong></P>
+				{% else %}
+					<P>Vous doit un montant de : <strong class="h5 text-warning"> {{solde|number_format(0, ',', ' ')}} </strong> Fcfa</P>
 				{% endif %}
 				</div>
 			</div>
 			<div class="col-md-6 offset-md-3 mb-5">
-				<img src="{{ vich_uploader_asset(payment, 'imageFile') }}" class="card-img-top" alt="{{payment.montantAPayer}}">
+				<img src="{{ vich_uploader_asset(payment, 'imageFile') }}" class="card-img-top" alt="{{payment.montantAPayer|number_format(0, ',', ' ')}}">
 			</div>
 			<div class="col-md-6 offset-md-3">
 					<p class="col-md-8 fs-4">Période du
@@ -31,7 +34,7 @@
 						<p class="text-success">Veuillez entrer le montant prévu pour ce mois</p>
 					{% endif %}
 					{{ form_row(form.montantRecu, {'attr': {'class': 'form-control','name': 'montantRecu','id': 'montantRecu','placeholder': 'Entrer le montant réçu'}}) }}
-					<p class="text-danger">Le montant que <strong>{{ payment.users.nomDeSociete }}</strong> a mentionné est <strong> {{payment.montantSaisir}}</strong> Fcfa. Veuillez comfirmer</p>
+					<p class="text-danger">Le montant que <strong>{{ payment.users.nomDeSociete }}</strong> a mentionné est <strong> {{payment.montantSaisir|number_format(0, ',', ' ')}}</strong> Fcfa. Veuillez comfirmer</p>
 					{{ form_row(form.typePaiement, {'attr': {'class': 'form-select','name': 'typePaiement','id': 'typePaiement'}}) }}
 					<p class="text-danger"><strong>{{ payment.users.nomDeSociete }}</strong> dit c'est un paiement <strong>{{payment.typePaiement}}</strong>. veuillez comfirmer.</p>
 					<div class="col-md-12 alert alert-warning" role="alert" id="alertMessageVerif">

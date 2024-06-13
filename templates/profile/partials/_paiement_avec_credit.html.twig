@@ -39,10 +39,10 @@
 						<table class="table table-hover table-bordered">
 							<thead class="table-primary">
 								<tr>
-									<th scope="col">Période</th>
-									<th scope="col">Reste payé</th> 
-									<th scope="col">Etat</th>
-									<th scope="col">Crédit total</th>
+									<th scope="col">Période de paiement</th>
+									<th scope="col">Paiement attendu du mois</th> 
+									<th scope="col">Etat de paiement</th>
+									<th scope="col">Solde dû</th>
 									<th scope="col">Action</th>
 								</tr>
 							</thead>
@@ -62,42 +62,46 @@
 									"December": 'Décembre'
 								} %}
                             {% for paiement in findPaymentsByUserAll %}
-							{% if paiement.montantRestant == 0 %}
-							{% else %}
-								<tr>
-									<td>
-									 	{% set dateFormatee = paiement.datePaiement|date('F Y') %}
-                						{{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
-									</td>
-									<td>
-										{{paiement.montantRestant}} F
-
-									</td> 
-									<td>
-									{% if paiement.status == "Non payé" %}
-										<span class="badge bg-danger">{{paiement.status}}</span>
-									{% elseif paiement.status == "Partiel" %}
-										<span class="badge bg-warning">{{paiement.status}}</span>
-										{% elseif paiement.status == "en attente" %}
-										<span class="badge bg-info">{{paiement.status}}</span>
-									{% endif %} 
-									</td>
-									<td>
-										{{paiement.solde}} F
-									</td>
-									<td> 
-									{% if paiement.montantAPayer == 0 %}
-										<a href="{{ path('app_retard_paiement', {'id': paiement.id}) }}" class="btn btn-danger btn-sm">Payer</a>
-									{% else %}
-										{% if paiement.montantSaisir >0 %}
-											<button type="button" class="btn btn-primary btn-sm" disabled>attente</button>
+								{% if paiement.status =="Non payé" or paiement.status =="en attente" %}
+									<tr>
+										<td>
+											{% set dateFormatee = paiement.datePaiement|date('F Y') %}
+											{{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
+										</td>
+										<td>
+										{% if paiement.montantRestant is empty %}
+											<span class="badge bg-info">Non définir</span>
 										{% else %}
-											<a href="{{ path('app_edit_paiement', {'id': paiement.id}) }}" class="btn btn-success btn-sm">Payer</a>
+											{{paiement.montantRestant|number_format(0, ',', ' ')}} F
 										{% endif %}
-									{% endif %}
-									</td>
-								</tr>
-							{% endif %}
+
+										</td>
+										<td>
+										{% if paiement.status == "Non payé" %}
+											<span class="badge bg-danger">{{paiement.status}}</span>
+										{% elseif paiement.status == "Partiel" %}
+											<span class="badge bg-warning">{{paiement.status}}</span>
+											{% elseif paiement.status == "en attente" %}
+											<span class="badge bg-info">{{paiement.status}}</span>
+										{% endif %} 
+										</td>
+										<td>
+											{{paiement.solde}} F
+										</td>
+										<td> 
+										{% if paiement.montantAPayer == 0 %}
+											<a href="{{ path('app_retard_paiement', {'id': paiement.id}) }}" class="btn btn-danger btn-sm">Payer</a>
+										{% else %}
+											{% if paiement.montantSaisir >0 %}
+												<button type="button" class="btn btn-primary btn-sm" disabled>attente</button>
+											{% else %}
+												<a href="{{ path('app_edit_paiement', {'id': paiement.id}) }}" class="btn btn-success btn-sm">Payer</a>
+											{% endif %}
+										{% endif %}
+										</td>
+									</tr> 
+
+								{% endif %}
                             {% endfor %}
 							</tbody>
 						</table>

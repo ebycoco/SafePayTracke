@@ -44,6 +44,7 @@ class ProfileController extends AbstractController
 
         // Récupérer tous les paiements de l'utilisateur connecté par ordre décroissant de la date de paiement
         $paiements = $paymentRepository->findPaymentUserPaginated($utilisateurConnecte, $page, $limit);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
 
         $totalPaiements = $paymentRepository->count(['users' => $utilisateurConnecte]);
         // Calculer le nombre total de pages
@@ -52,7 +53,8 @@ class ProfileController extends AbstractController
         return $this->render('profile/profile.html.twig', [
             'paiements' => $paiements,
             'totalPages' => $totalPages,
-            'currentPage' => $page,
+            'paymentsNombre' => $paymentsNombre,
+            'currentPage' => $page
         ]);
     }
 
@@ -62,12 +64,13 @@ class ProfileController extends AbstractController
         UserRepository $usersRepository,
         TokenGeneratorInterface $tokenGenerator,
         EntityManagerInterface $entityManager,
+        PaymentRepository $paymentRepository,
         SendMailService $mail
     ):Response
     {
          // Récupérer l'utilisateur connecté
          $utilisateurConnecte = $this->getUser();
-        
+         $paymentsNombre = $paymentRepository->findPaymentNombre();
          // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
          if (!$utilisateurConnecte) {
              return $this->redirectToRoute('app_login');
@@ -118,6 +121,7 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_profile_pass_change');
         }
         return $this->render('profile/change_pass.html.twig', [
+            'paymentsNombre' => $paymentsNombre,
             'requestPassForm' => $form
         ]);
     }
@@ -125,6 +129,7 @@ class ProfileController extends AbstractController
     #[Route('/modifier-profil', name: 'modifier_profil',methods: ['GET', 'POST'])]
     public function modifierProfil(
         Request $request,
+        PaymentRepository $paymentRepository,
         EntityManagerInterface $entityManager
         ): Response
     {
@@ -132,6 +137,7 @@ class ProfileController extends AbstractController
         $user = $this->getUser(); // Récupérer l'utilisateur actuellement connecté
          // Récupérer l'utilisateur connecté
          $utilisateurConnecte = $this->getUser();
+         $paymentsNombre = $paymentRepository->findPaymentNombre();
         
          // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
          if (!$utilisateurConnecte) {
@@ -155,7 +161,8 @@ class ProfileController extends AbstractController
         return $this->render('profile/modifier_profil.html.twig', [
             'user' => $user,
             'NomDeSociete'=> $NomDeSociete,
-            'form' => $form,
+            'paymentsNombre' => $paymentsNombre,
+            'form' => $form
         ]);
     }
 
@@ -167,6 +174,7 @@ class ProfileController extends AbstractController
         UserRepository $userRepository
     ):Response
     {
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
     // Obtenez l'utilisateur actuellement connecté
     $utilisateurConnecte = $this->getUser();
     // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
@@ -182,6 +190,7 @@ class ProfileController extends AbstractController
     $userId = $utilisateurConnecte->getId();
     // Récupérer les paiements de l'utilisateur connecté
     $paiementsByUser = $paymentRepository->findPaymentsByUser($userId);
+    
     $findPaymentsByUserAll = $paymentRepository->findPaymentsByUserAll($userId);
     // Créer un nouveau paiement et le formulaire associé
     $payment = new Payment();
@@ -195,14 +204,11 @@ class ProfileController extends AbstractController
             // Récupérer les données du formulaire
             $montantAPayer = $form->getData()->getMontantAPayer();
             $datePaiement = $form->getData()->getDatePaiement();
+            $dateDuRetatPaiement = $form->getData()->getDatePaiement();
 
             $moisActuel = $datePaiement->format('m');
             $mois = $datePaiement->format('F');
             $annee = $datePaiement->format('Y');
-            
-
-            
-
             $typePaiement = $form->getData()->getTypePaiement();
             // Récupérer les paiements de l'utilisateur pour le mois sélectionné
             $paiements = $paymentRepository->findPaymentsByUserAndMonth($userId, $annee, $moisActuel);
@@ -237,10 +243,11 @@ class ProfileController extends AbstractController
                     $this->addFlash('warning', "Vous ne pouvez pas fait un paiement Normal car vous n'avez pas selectionné ce mois de " . $dateDuJour . ". Veuillez choisir autre type de paiement");
                     return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
                 }
-                $this->handleNormalPayment($entityManager, $paymentRepository, $userRepository, $paiements, $payment, $montantAPayer, $userId, $solde, $moisActuel, $annee, $mois);
+                $this->handleNormalPayment($entityManager, $paymentRepository, $userRepository, $paiements, $payment, $montantAPayer, $userId, $solde, $moisActuel, $annee, $mois,$dateDuRetatPaiement);
             } elseif ($typePaiement == "Retard") {
                 $dateDuJour = date("F Y");
                 $dateDuPaiement = $datePaiement->format('F Y');
+                $dateDuRetatPaiement = $form->getData()->getDatePaiement();
 
                 // Mapping des mois à leurs positions numériques dans l'année
                 $mois = [
@@ -274,7 +281,6 @@ class ProfileController extends AbstractController
                         $payment = $retardMois[0]; // On prend le premier élément du tableau
                         $paymentId = $payment->getId(); // On accède à l'id de l'objet Payment
                         $moisPr = $payment->getDatePaiement()->format('F');
-                    
                         // Tableau associatif pour mapper les mois en anglais aux mois en français
                         $moisMapping = [
                             "January" => "de Janvier",
@@ -290,7 +296,6 @@ class ProfileController extends AbstractController
                             "November" => "de Novembre",
                             "December" => "de Décembre"
                         ];
-                    
                         // Utilisation du tableau pour obtenir le mois en français
                         if (array_key_exists($moisPr, $moisMapping)) {
                             $moisFlash = $moisMapping[$moisPr];
@@ -298,13 +303,11 @@ class ProfileController extends AbstractController
                             return $this->redirectToRoute('app_retard_paiement', ["id"=>$paymentId], Response::HTTP_SEE_OTHER);
                         }
                     }
-                    
-                    $this->handleLatePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $mois);
+                    $this->handleLatePayment($entityManager, $paymentRepository,$userRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $mois,$dateDuPaiement,$dateDuRetatPaiement);
                 }
             } elseif ($typePaiement == "Anticiper") {
                 $dateDuJour = date("F Y");
                 $dateDuPaiement = $datePaiement->format('F Y');
-
                 // Mapping des mois à leurs positions numériques dans l'année
                 $mois = [
                     'january' => 1,
@@ -327,9 +330,9 @@ class ProfileController extends AbstractController
 
                 $lastNonNullSolde = null;
 
-                // Parcourir les objets Payment pour trouver le dernier solde non nul
-                foreach ($findPaymentsByUserAll as $payment) {
-                    $solde = $payment->getSolde(); // Assurez-vous que la méthode getSolde() existe dans votre classe Payment
+                 // Parcourir les objets Payment pour trouver le dernier solde non nul
+                 foreach ($findPaymentsByUserAll as $paiement) {
+                    $solde = $paiement->getSolde(); // Assurez-vous que la méthode getSolde() existe dans votre classe Payment
                     if ($solde !== null) {
                         $lastNonNullSolde = $solde;
                     }
@@ -342,7 +345,8 @@ class ProfileController extends AbstractController
                     $this->addFlash('warning', "Vous ne pouvez pas anticiper ce mois de " . $dateDuPaiement . " car ce mois est passé. Veuillez sélectionner un autre type de paiement");
                     return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
                 } else {
-                    $this->handleAdvancePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $lastNonNullSolde);
+                    $datePaiement = $form->getData()->getDatePaiement();
+                    $this->handleAdvancePayment($entityManager, $paymentRepository, $payment, $montantAPayer, $userId, $moisActuel, $annee, $lastNonNullSolde,$datePaiement);
                 }
             }
             // Valider la transaction
@@ -358,6 +362,7 @@ class ProfileController extends AbstractController
 
     return $this->render('profile/paiement.html.twig', [
         'payment' => $payment,
+        'paymentsNombre' => $paymentsNombre,
         'NomDeSociete' => $NomDeSociete,
         'paiementsByUser' => $paiementsByUser,
         'findPaymentsByUserAll' => $findPaymentsByUserAll,
@@ -368,6 +373,7 @@ class ProfileController extends AbstractController
 
     #[Route('/paiement/{id}/edit', name: 'app_edit_paiement')]
     public function editPaiement(
+        PaymentRepository $paymentRepository,
         Request $request,
         EntityManagerInterface $entityManager,
         Payment $payment
@@ -385,6 +391,7 @@ class ProfileController extends AbstractController
         }
 
         $NomDeSociete = $utilisateurConnecte->getNomDeSociete();
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
 
         // Créer le formulaire en utilisant l'entité existante
         $form = $this->createForm(PaymentRetardEditType::class, $payment);
@@ -433,6 +440,7 @@ class ProfileController extends AbstractController
 
         // Rendre le formulaire avec les données
         return $this->render('profile/edit_paiement.html.twig', [
+            'paymentsNombre' => $paymentsNombre,
             'payment' => $payment,
             'NomDeSociete' => $NomDeSociete,
             'form' => $form,
@@ -441,11 +449,13 @@ class ProfileController extends AbstractController
 
     #[Route('/paiement/{id}/retard', name: 'app_retard_paiement')]
     public function retardPaiement(
+        PaymentRepository $paymentRepository,
         Request $request,
         EntityManagerInterface $entityManager,
         Payment $payment
     ): Response {
         $utilisateurConnecte = $this->getUser();
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
@@ -462,7 +472,6 @@ class ProfileController extends AbstractController
         $form = $this->createForm(PaymentRetardEditType::class, $payment);
         $form->handleRequest($request);
         $montantRestant = $payment->getMontantRestant();
-        
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
@@ -476,11 +485,13 @@ class ProfileController extends AbstractController
                     $this->addFlash('warning', 'Attention, le montant renseigné est trop élevé.');
                     return $this->redirectToRoute('app_paiement', [], Response::HTTP_SEE_OTHER);
                 }
+                $avancePaiement= $payment->getAvancePaiement() + $montantAPayer;
 
                 // Mettre à jour les informations du paiement
                 $payment->setTotalMontantPayer($totalMontantPayer);
                 $payment->setMontantAPayer($montantAPayerNouveau);
                 $payment->setMontantSaisir($montantAPayer);
+                $payment->setAvancePaiement($avancePaiement);
                 $payment->setVerifier(false);
                 $payment->setVisibilite(true);
                 $payment->setStatus("en attente");
@@ -497,6 +508,7 @@ class ProfileController extends AbstractController
         }
 
         return $this->render('profile/retard_paiement.html.twig', [
+            'paymentsNombre' => $paymentsNombre,
             'payment' => $payment,
             'NomDeSociete' => $NomDeSociete,
             'form' => $form->createView(),
@@ -508,6 +520,7 @@ class ProfileController extends AbstractController
     {
         // Récupérer l'utilisateur connecté
         $utilisateurConnecte = $this->getUser();
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
@@ -533,6 +546,7 @@ class ProfileController extends AbstractController
         $totalPages = ceil($totalPaiements / $limit);
 
         return $this->render('profile/mes_retard_paiement.html.twig', [
+            'paymentsNombre' => $paymentsNombre,
             'paiements' => $paiements,
             'totalPages' => $totalPages,
             'currentPage' => $page,
@@ -553,12 +567,192 @@ class ProfileController extends AbstractController
         $solde,
         $moisActuel,
         $annee,
-        $mois
+        $mois,
+        $dateDuRetatPaiement
     ) {
         $verifPaiements = $paymentRepository->findPaymentsByUserAndMonthTout($userId, $annee, $moisActuel);
 
         if (empty($verifPaiements)) {
             $etatTable = $paymentRepository->isPaymentTableEmpty();
+            // on verifie si la table n'est pas vide
+            if(!$etatTable){
+
+                // Convertir $moisActuel en objet DateTime
+                $dateMoisActuel = \DateTime::createFromFormat('m', $moisActuel);
+
+                // Vérifier si la conversion a réussi
+                if (!$dateMoisActuel) {
+                    throw new \Exception("Format de date incorrect pour \$moisActuel");
+                }
+                // Modifier la date pour obtenir le mois précédent
+                $dateMoisPrecedent = $dateMoisActuel->modify('first day of last month');
+
+                // Récupérer tous les utilisateurs ayant le rôle ROLE_LOCATEUR
+                $locateurs = $userRepository->findByRole('ROLE_LOCATEUR');
+
+                foreach ($locateurs as $locateur) {
+                    // Vérifier si l'utilisateur a effectué un paiement pour le mois précédent
+                    $paiementLocateur = $paymentRepository->findPaymentByUserAndMonth($locateur, $dateMoisPrecedent->format('Y-m'));
+                    $paiementLocateurCeMoisRe = $paymentRepository->findSecondLatestDEPaymentByUserCi($locateur);
+
+                    if (!$paiementLocateur) {
+                        if ($locateur != $this->getUser()) {
+                            $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement();
+                            $solde = $paiementLocateurCeMoisRe->getSolde();
+                            $montantPrevu = $paiementLocateurCeMoisRe->getMontantPrevu();
+                            if ($avancePaiement == 0) {
+                                $avancePaiement = 0;
+                            } else {
+                                $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement() + $montantPrevu;
+                            }
+                        } else {
+                            if ($paiementLocateurCeMoisRe->getAvancePaiement()==0) {
+                                $avancePaiement = 0;
+                            } else {
+                                $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement() - $montantAPayer;
+                            }
+                        }
+                        // Créer un nouveau paiement avec une valeur par défaut
+                        $nouveauPaiement = new Payment();
+                        $nouveauPaiement->setUsers($locateur);
+                        $nouveauPaiement->setMontantAPayer(0);
+                        $nouveauPaiement->setTotalMontantPayer(0);
+                        $nouveauPaiement->setMontantSaisir(0);
+                        $nouveauPaiement->setSolde($solde);
+                        $nouveauPaiement->setMontantRestant($montantPrevu);
+                        $nouveauPaiement->setMontantPrevu($montantPrevu);
+                        $nouveauPaiement->setAvancePaiement($avancePaiement);
+                        // Formater la date pour obtenir le 01 du mois précédent
+                        $dateMoisPrecedent01 = \DateTime::createFromFormat('Y-m-d', $dateMoisPrecedent->format('Y-m-01'));
+                        $nouveauPaiement->setDatePaiement($dateMoisPrecedent01);
+                        $nouveauPaiement->setRecuDePaiement("default.png");
+                        $nouveauPaiement->setStatus("Retard");
+                        $nouveauPaiement->setTypePaiement("Non payé");
+                        $nouveauPaiement->setVerifier(false);
+                        // Persister le nouveau paiement dans la base de données
+                        $entityManager->persist($nouveauPaiement);
+                    }else {
+                        // Vérifier si les utilisateurs a effectué un paiement pour le mois selectionné
+                        $paiementLocateurCeMois = $paymentRepository->findPaymentByUserAndMonthnow($locateur, $dateMoisActuel->format('Y-m'));
+                        $paiementLocateurCeMoisRe = $paymentRepository->findSecondLatestDEPaymentByUserCi($locateur);
+
+                        if (!$paiementLocateurCeMois) {
+                            if ($locateur != $this->getUser()) {
+                                $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement();
+                                $solde = $paiementLocateurCeMoisRe->getSolde();
+                                $montantPrevu = $paiementLocateurCeMoisRe->getMontantPrevu();
+                                if ($avancePaiement == 0) {
+                                    $avancePaiement = 0;
+                                } else {
+                                    if ($paiementLocateurCeMoisRe->getAvancePaiement()<0) {
+                                        $avancePaiement = - (($montantPrevu)) - (- $paiementLocateurCeMoisRe->getAvancePaiement());
+                                        $solde = $montantPrevu + $solde;
+                                    } else {
+                                        $avancePaiement =  $paiementLocateurCeMoisRe->getAvancePaiement() - $montantPrevu;
+                                        $solde = $montantPrevu + $solde;
+                                    }
+                                }
+                                // Formater la date pour obtenir le 01 du mois précédent
+                                $dateDuRetatPaiement01 = \DateTime::createFromFormat('Y-m-d', $dateDuRetatPaiement->format('Y-m-01'));
+                                // Créer un nouveau paiement avec une valeur par défaut
+                                $nouveauPaiement = new Payment();
+                                $nouveauPaiement->setUsers($locateur);
+                                $nouveauPaiement->setMontantAPayer(0);
+                                $nouveauPaiement->setTotalMontantPayer(0);
+                                $nouveauPaiement->setMontantSaisir(0);
+                                $nouveauPaiement->setSolde($solde);
+                                $nouveauPaiement->setMontantPrevu($montantPrevu);
+                                $nouveauPaiement->setMontantRestant($montantPrevu);
+                                $nouveauPaiement->setAvancePaiement($avancePaiement);
+                                $nouveauPaiement->setDatePaiement($dateDuRetatPaiement01);
+                                $nouveauPaiement->setRecuDePaiement("default.png");
+                                $nouveauPaiement->setStatus("Non payé");
+                                $nouveauPaiement->setTypePaiement("Retard");
+                                $nouveauPaiement->setVerifier(true);
+                                // Persister le nouveau paiement dans la base de données
+                                $entityManager->persist($nouveauPaiement);
+                            }
+                            if ($locateur == $this->getUser()) {
+                                $soldeUSER = $paiementLocateurCeMoisRe->getSolde();
+                                $avancePaiementUSER = $paiementLocateurCeMoisRe->getAvancePaiement();
+                                $soldeUSER = $soldeUSER - $montantAPayer;
+
+                                if ($soldeUSER >= $montantAPayer) {
+                                    $soldeUSER = $soldeUSER - $montantAPayer;
+                                } else {
+                                    $soldeUSER = 0;
+                                }
+
+                            }
+
+                        }
+                    }
+
+                }
+
+                // Exécuter les opérations de persistance
+                $entityManager->flush();
+
+            }
+            $avancePaiement = $avancePaiementUSER;
+            $solde = $soldeUSER;
+            $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser(),$avancePaiement,$solde);
+            $this->addFlash('success', "Votre paiement a été effectué avec succès !");
+        } else {
+            $sommeMontantsRestants = array_sum(array_map(fn($paiement) => $paiement->getMontantRestant(), $verifPaiements));
+            // Convertir $moisActuel en objet DateTime
+            $dateMoisActuel = \DateTime::createFromFormat('m', $moisActuel);
+
+            // Vérifier si la conversion a réussi
+            if (!$dateMoisActuel) {
+                throw new \Exception("Format de date incorrect pour \$moisActuel");
+            }
+            // Modifier la date pour obtenir le mois précédent
+            $dateMoisPrecedent = $dateMoisActuel->modify('first day of last month');
+            $moisP = $dateMoisPrecedent->format("m"); 
+            $anneeP = $dateMoisPrecedent->format('Y');
+            // Afficher le dernier solde non nul
+            $paiementLocateurCeMoisRe = $paymentRepository->findPaymentsByUserPrecedent($userId,$anneeP,$moisP);
+            if ($sommeMontantsRestants == 0) {
+                $this->addFlash('info', "Vous ne pouvez pas car vous avez soldé pour le mois sélectionné !");
+            } else {
+                $differentMontant = $sommeMontantsRestants - $montantAPayer;
+                if ($paiementLocateurCeMoisRe->getAvancePaiement()==0) {
+                    $avancePaiement = 0;
+                } else {
+                    $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement();
+                }
+                if ($differentMontant < 0) {
+                    $this->addFlash('warning', "Il vous reste à payer {$sommeMontantsRestants} Fcfa. Veuillez reprendre !");
+                } else {
+                    $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser(),$avancePaiement,$solde);
+                    $this->addFlash('success', "Votre paiement a été effectué avec succès !");
+                }
+            }
+        }
+    }
+
+    /**
+     * Gérer le processus de paiement en retard.
+     */
+    private function handleLatePayment(
+        EntityManagerInterface $entityManager,
+        PaymentRepository $paymentRepository,
+        UserRepository $userRepository,
+        Payment $payment,
+        $montantAPayer,
+        $userId,
+        $moisActuel,
+        $annee,
+        $mois,
+        $dateDuPaiement,
+        $dateDuRetatPaiement
+    ) {
+        $verifPaiements = $paymentRepository->findPaymentsByUserAndMonthTout($userId, $annee, $moisActuel);
+
+        if (empty($verifPaiements)) {
+            $etatTable = $paymentRepository->isPaymentTableEmpty();
+
             // on verifie si la table n'est pas vide
             if(!$etatTable){
 
@@ -579,74 +773,167 @@ class ProfileController extends AbstractController
                 foreach ($locateurs as $locateur) {
                     // Vérifier si l'utilisateur a effectué un paiement pour le mois précédent
                     $paiementLocateur = $paymentRepository->findPaymentByUserAndMonth($locateur, $dateMoisPrecedent->format('Y-m'));
+                    $paiementLocateurCeMoisRe = $paymentRepository->findSecondLatestDEPaymentByUserCi($locateur);
                     if (!$paiementLocateur) {
-                        // Créer un nouveau paiement avec une valeur par défaut
-                        $nouveauPaiement = new Payment();
-                        $nouveauPaiement->setUsers($locateur);
-                        $nouveauPaiement->setMontantAPayer(0);
-                        $nouveauPaiement->setTotalMontantPayer(0);
-                        $nouveauPaiement->setMontantSaisir(0);
-                        // Formater la date pour obtenir le 01 du mois précédent
-                        $dateMoisPrecedent01 = \DateTime::createFromFormat('Y-m-d', $dateMoisPrecedent->format('Y-m-01'));
-                        $nouveauPaiement->setDatePaiement($dateMoisPrecedent01);
-                        $nouveauPaiement->setRecuDePaiement("default.png");
-                        $nouveauPaiement->setStatus("Retard");
-                        $nouveauPaiement->setTypePaiement("Non payé");
-                        $nouveauPaiement->setVerifier(false);
-                        // Persister le nouveau paiement dans la base de données
-                        $entityManager->persist($nouveauPaiement);
+                        if ($locateur != $this->getUser()) {
+                            $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement();
+                            $solde = $paiementLocateurCeMoisRe->getSolde();
+                            $montantPrevu = $paiementLocateurCeMoisRe->getMontantPrevu();
+                            if ($avancePaiement == 0) {
+                                $avancePaiement = 0;
+                            } else {
+                                if ($paiementLocateurCeMoisRe->getAvancePaiement()<0) {
+                                    $avancePaiement = - (($montantPrevu)) - (- $paiementLocateurCeMoisRe->getAvancePaiement());
+                                    $solde = $montantPrevu + $solde;
+                                } else {
+                                    $avancePaiement =  $paiementLocateurCeMoisRe->getAvancePaiement() - $montantPrevu;
+                                    $solde = $montantPrevu + $solde;
+                                }
+                            }
+                            // Créer un nouveau paiement avec une valeur par défaut
+                            $nouveauPaiement = new Payment();
+                            $nouveauPaiement->setUsers($locateur);
+                            $nouveauPaiement->setMontantAPayer(0);
+                            $nouveauPaiement->setTotalMontantPayer(0);
+                            $nouveauPaiement->setMontantSaisir(0);
+                            $nouveauPaiement->setSolde($solde);
+                            $nouveauPaiement->setMontantPrevu($montantPrevu);
+                            $nouveauPaiement->setMontantRestant($montantPrevu);
+                            $nouveauPaiement->setAvancePaiement($avancePaiement);
+                            // Formater la date pour obtenir le 01 du mois précédent
+                            $dateDuRetatPaiement01 = \DateTime::createFromFormat('Y-m-d', $dateDuRetatPaiement->format('Y-m-01'));
+                            $nouveauPaiement->setDatePaiement($dateDuRetatPaiement01); 
+                            $nouveauPaiement->setRecuDePaiement("default.png");
+                            $nouveauPaiement->setStatus(" Non payé");
+                            $nouveauPaiement->setTypePaiement("Retard");
+                            $nouveauPaiement->setVerifier(true);
+                            // Persister le nouveau paiement dans la base de données
+                            $entityManager->persist($nouveauPaiement);
+                        } 
+                        if ($locateur == $this->getUser()) {
+                            $soldeUSER = $paiementLocateurCeMoisRe->getSolde();
+                            if ($paiementLocateurCeMoisRe->getAvancePaiement()==0) {
+                                $avancePaiementUSER = 0;
+                            }elseif ($paiementLocateurCeMoisRe->getAvancePaiement()<0) {
+                                $avancePaiementUSER = $paiementLocateurCeMoisRe->getAvancePaiement() + $montantAPayer;
+                            }
+                             else {
+                                $avancePaiementUSER = $paiementLocateurCeMoisRe->getAvancePaiement() - $montantAPayer;
+                            }
+                            $soldeUSER = $soldeUSER - $montantAPayer;
+
+                            if ($soldeUSER >= $montantAPayer) {
+                                $soldeUSER = $soldeUSER - $montantAPayer;
+                            } else {
+                                $soldeUSER = 0;
+                            }
+
+                        }
+
+                    }else {
+                        // Vérifier si les utilisateurs a effectué un paiement pour le mois selectionné
+                        $paiementLocateurCeMois = $paymentRepository->findPaymentByUserAndMonthnow($locateur, $dateDuRetatPaiement->format('Y-m'));
+                        $paiementLocateurCeMoisRe = $paymentRepository->findSecondLatestDEPaymentByUserCi($locateur);
+
+                        if (!$paiementLocateurCeMois) {
+                            if ($locateur != $this->getUser()) {
+                                $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement();
+                                $solde = $paiementLocateurCeMoisRe->getSolde();
+                                $montantPrevu = $paiementLocateurCeMoisRe->getMontantPrevu();
+                                if ($avancePaiement == 0) {
+                                    $avancePaiement = 0;
+                                } else {
+                                    if ($paiementLocateurCeMoisRe->getAvancePaiement()<0) {
+                                        $avancePaiement = - (($montantPrevu)) - (- $paiementLocateurCeMoisRe->getAvancePaiement());
+                                        $solde = $montantPrevu + $solde;
+                                    } else {
+                                        $avancePaiement =  $paiementLocateurCeMoisRe->getAvancePaiement() - $montantPrevu;
+                                        $solde = $montantPrevu + $solde;
+                                    }
+                                }
+                                // Formater la date pour obtenir le 01 du mois précédent
+                                $dateDuRetatPaiement01 = \DateTime::createFromFormat('Y-m-d', $dateDuRetatPaiement->format('Y-m-01'));
+                                // Créer un nouveau paiement avec une valeur par défaut
+                                $nouveauPaiement = new Payment();
+                                $nouveauPaiement->setUsers($locateur);
+                                $nouveauPaiement->setMontantAPayer(0);
+                                $nouveauPaiement->setTotalMontantPayer(0);
+                                $nouveauPaiement->setMontantSaisir(0);
+                                $nouveauPaiement->setSolde($solde);
+                                $nouveauPaiement->setMontantPrevu($montantPrevu);
+                                $nouveauPaiement->setMontantRestant($montantPrevu);
+                                $nouveauPaiement->setAvancePaiement($avancePaiement);
+                                $nouveauPaiement->setDatePaiement($dateDuRetatPaiement01);
+                                $nouveauPaiement->setRecuDePaiement("default.png");
+                                $nouveauPaiement->setStatus("Non payé");
+                                $nouveauPaiement->setTypePaiement("Retard");
+                                $nouveauPaiement->setVerifier(true);
+                                // Persister le nouveau paiement dans la base de données
+                                $entityManager->persist($nouveauPaiement);
+                            }
+                            if ($locateur == $this->getUser()) {
+                                $soldeUSER = $paiementLocateurCeMoisRe->getSolde();
+                                if ($paiementLocateurCeMoisRe->getAvancePaiement()==0) {
+                                    $avancePaiementUSER = 0;
+                                }elseif ($paiementLocateurCeMoisRe->getAvancePaiement()<0) {
+                                    $avancePaiementUSER = $paiementLocateurCeMoisRe->getAvancePaiement() + $montantAPayer;
+                                }
+                                 else {
+                                    $avancePaiementUSER = $paiementLocateurCeMoisRe->getAvancePaiement() - $montantAPayer;
+                                }
+                                $soldeUSER = $soldeUSER - $montantAPayer;
+
+                                if ($soldeUSER >= $montantAPayer) {
+                                    $soldeUSER = $soldeUSER - $montantAPayer;
+                                } else {
+                                    $soldeUSER = 0;
+                                }
+
+                            }
+
+                        }
                     }
                 }
-
                 // Exécuter les opérations de persistance
                 $entityManager->flush();
 
             }
-            $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser());
+            $avancePaiement = $avancePaiementUSER;
+            $solde = $soldeUSER;
+
+            $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser(),$avancePaiement,$solde);
             $this->addFlash('success', "Votre paiement a été effectué avec succès !");
         } else {
-            dd("ici 2");
             $sommeMontantsRestants = array_sum(array_map(fn($paiement) => $paiement->getMontantRestant(), $verifPaiements));
-            if ($sommeMontantsRestants == 0) {
-                $this->addFlash('info', "Vous ne pouvez pas car vous avez soldé pour le mois sélectionné !");
-            } else {
-                $differentMontant = $sommeMontantsRestants - $montantAPayer;
-                if ($differentMontant < 0) {
-                    $this->addFlash('warning', "Il vous reste à payer {$sommeMontantsRestants} Fcfa. Veuillez reprendre !");
-                } else {
-                    $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser());
-                    $this->addFlash('success', "Votre paiement a été effectué avec succès !");
-                }
-            }
-        }
-    }
+            // Convertir $moisActuel en objet DateTime
+            $dateMoisActuel = \DateTime::createFromFormat('m', $moisActuel);
 
-    /**
-     * Gérer le processus de paiement en retard.
-     */
-    private function handleLatePayment(
-        EntityManagerInterface $entityManager,
-        PaymentRepository $paymentRepository, 
-        Payment $payment,
-        $montantAPayer,
-        $userId, 
-        $moisActuel,
-        $annee,
-        $mois
-    ) {
-        $verifPaiements = $paymentRepository->findPaymentsByUserAndMonthTout($userId, $annee, $moisActuel);
-        if (empty($verifPaiements)) {
-            $this->addFlash('info', "Attention, vous ne pouvez pas car vous n'avez pas de retard pour le mois selectionné !");
-        } else {
-            $sommeMontantsRestants = array_sum(array_map(fn($paiement) => $paiement->getMontantRestant(), $verifPaiements));
+            // Vérifier si la conversion a réussi
+            if (!$dateMoisActuel) {
+                throw new \Exception("Format de date incorrect pour \$moisActuel");
+            }
+            // Modifier la date pour obtenir le mois précédent
+            $dateMoisPrecedent = $dateMoisActuel->modify('first day of last month');
+            $moisP = $dateMoisPrecedent->format("m"); 
+            $anneeP = $dateMoisPrecedent->format('Y');
+            // Afficher le dernier solde non nul
+            $paiementLocateurCeMoisRe = $paymentRepository->findPaymentsByUserPrecedent($userId,$anneeP,$moisP);
+            
             if ($sommeMontantsRestants == 0) {
                 $this->addFlash('info', "Vous ne pouvez pas car vous avez soldé pour le mois sélectionné !");
             } else {
                 $differentMontant = $sommeMontantsRestants - $montantAPayer;
+                if ($paiementLocateurCeMoisRe->getAvancePaiement()==0) {
+                    $avancePaiement = 0;
+                } else {
+                    $avancePaiement = $paiementLocateurCeMoisRe->getAvancePaiement() - $montantAPayer;
+                    $solde = $paiementLocateurCeMoisRe->getSolde();
+                }
+
                 if ($differentMontant < 0) {
                     $this->addFlash('warning', "Il vous reste à payer {$sommeMontantsRestants} Fcfa. Veuillez reprendre !");
                 } else {
-                    $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser());
+                    $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser(),$avancePaiement,$solde);
                     $this->addFlash('success', "Votre paiement a été effectué avec succès !");
                 }
             }
@@ -665,15 +952,33 @@ class ProfileController extends AbstractController
         $userId,
         $moisActuel,
         $annee,
-        $lastNonNullSolde
+        $lastNonNullSolde,
+        $datePaiement
     ) {
         $verifPaiements = $paymentRepository->findPaymentsByUserAndMonthTout($userId, $annee, $moisActuel);
-             // Afficher le dernier solde non nul 
+        // Convertir $moisActuel en objet DateTime
+        $dateMoisActuel = \DateTime::createFromFormat('m', $moisActuel);
+
+        // Vérifier si la conversion a réussi
+        if (!$dateMoisActuel) {
+            throw new \Exception("Format de date incorrect pour \$moisActuel");
+        }
+        // Modifier la date pour obtenir le mois précédent
+        $dateMoisPrecedent = $dateMoisActuel->modify('first day of last month');
+        $moisP = $dateMoisPrecedent->format("m");
+        $anneeP = $dateMoisPrecedent->format('Y');
+        // Afficher le dernier solde non nul
+        $paiementLocateurCeMoisRe = $paymentRepository->findPaymentsByUserPrecedent($userId,$anneeP,$moisP);
+        $avancePaiement = $montantAPayer + $paiementLocateurCeMoisRe->getAvancePaiement() ;
+        $solde=0;
+
         if (empty($verifPaiements)) {
             if ($lastNonNullSolde > 0 || $lastNonNullSolde === null) {
                 $this->addFlash('warning', "Attention, vous ne pouvez pas car vous n'avez jamais fait de paiement ou votre dernier paiement n'a pas encore été validé !");
-            } else {
-                $this->persistPayment($entityManager, $payment, $montantAPayer, $this->getUser());
+            } else { 
+                $payment->setMontantAPayer($montantAPayer); 
+                $payment->setDatePaiement($datePaiement); 
+                $this->persistPayment($entityManager,$payment,$montantAPayer,$this->getUser(),$avancePaiement,$solde);
                 $this->addFlash('success', "Merci pour votre paiement anticipé !");
             }
         } else {
@@ -685,10 +990,16 @@ class ProfileController extends AbstractController
     /**
      * Persister le paiement dans la base de données.
      */
-    private function persistPayment(EntityManagerInterface $entityManager, Payment $payment, $montantAPayer, $user) {
+    private function persistPayment(EntityManagerInterface $entityManager, Payment $payment, $montantAPayer, $user,$avancePaiement,$solde) {
+        
+        $avance = $avancePaiement;
         $payment->setUsers($user);
         $payment->setTotalMontantPayer($montantAPayer);
         $payment->setMontantSaisir($montantAPayer);
+        $payment->setVerifier(false);
+        $payment->setAvancePaiement($avance);
+        $payment->setSolde($solde);
+        $payment->setVisibilite(true);
         $payment->setVerifier(false);
         $entityManager->persist($payment);
         $entityManager->flush();

@@ -25,7 +25,7 @@
 									"December": 'Décembre'
 								} %}
 				<p> Le montant que vous devez est de
-				<strong class="text-primary">{{payment.montantRestant}} Fcfa</strong>
+				<strong class="text-primary">{{payment.montantRestant|number_format(0, ',', ' ')}} Fcfa</strong>
 				pour {% set dateFormatee = payment.datePaiement|date('F Y') %}
 				{{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}.
 				</p>

@@ -91,6 +91,78 @@ class PaymentRepository extends ServiceEntityRepository
         return $result;
     }
 
+    public function findPaymentNouvellePaginated(int $page, int $limit = 2): array
+    {
+
+        $limit = abs($limit);
+
+        $result = [];
+
+        $query = $this->getEntityManager()->createQueryBuilder()
+            ->select('p')
+            ->from('App\Entity\Payment', 'p')
+            ->where('p.status = :status')
+            ->setParameter('status', "en attente")
+            ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult(($page * $limit) - $limit);
+
+        $paginator = new Paginator($query);
+        $data = $paginator->getQuery()->getResult();
+        //On vérifie qu'on a des données
+
+        if(empty($data)){
+            return $result;
+        }
+
+        //On calcule le nombre de pages
+        $pages = ceil($paginator->count() / $limit);
+
+        // On remplit le tableau
+        $result['data'] = $data;
+        $result['pages'] = $pages;
+        $result['page'] = $page;
+        $result['limit'] = $limit;
+
+        return $result;
+    }
+
+    public function findPaymentAjoutMontantPrevuPaginated(int $page, int $limit = 2): array
+    {
+
+        $limit = abs($limit);
+
+        $result = [];
+
+        $query = $this->getEntityManager()->createQueryBuilder()
+            ->select('p')
+            ->from('App\Entity\Payment', 'p')
+            ->where('p.isVisibilite = :visibilite')
+            ->setParameter('visibilite', false)
+            ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult(($page * $limit) - $limit);
+
+        $paginator = new Paginator($query);
+        $data = $paginator->getQuery()->getResult();
+        //On vérifie qu'on a des données
+
+        if(empty($data)){
+            return $result;
+        }
+
+        //On calcule le nombre de pages
+        $pages = ceil($paginator->count() / $limit);
+
+        // On remplit le tableau
+        $result['data'] = $data;
+        $result['pages'] = $pages;
+        $result['page'] = $page;
+        $result['limit'] = $limit;
+
+        return $result;
+    }
+
     public function findPaymentUserPaginated(User $user, int $page, int $limit = 8): array
     {
         $offset = ($page - 1) * $limit;
@@ -144,6 +216,26 @@ class PaymentRepository extends ServiceEntityRepository
             ->orderBy('p.datePaiement', 'DESC')
             ->setMaxResults(2) // Récupérer les deux paiements les plus récents
             ->getQuery()
+            ->getResult()[1] ?? null; // Obtenir le deuxième résultat
+    }
+    public function findSecondLatestDEPaymentByUserOne(User $user): ?Payment
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.users = :user')
+            ->setParameter('user', $user)
+            ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults(2) // Récupérer les deux paiements les plus récents
+            ->getQuery()
+            ->getResult()[0] ?? null; // Obtenir le premier résultat
+    }
+    public function findSecondLatestDEPaymentByUserCi(User $user): ?Payment
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.users = :user')
+            ->setParameter('user', $user)
+            ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults(2) // Récupérer les deux paiements les plus récents
+            ->getQuery()
             ->getResult()[0] ?? null; // Obtenir le deuxième résultat
     }
 
@@ -172,6 +264,22 @@ class PaymentRepository extends ServiceEntityRepository
             ->setMaxResults(1);
         return  $qb->getQuery()->getOneOrNullResult();
     }
+    public function findPaymentsByUserPrecedent($userId,$year, $month)
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->andWhere('p.users = :user') // Assurez-vous que l'alias 'p.user' correspond à votre mappage d'entité
+            ->andWhere("YEAR(p.datePaiement) = :year") // Utilisez le bon nom de champ pour 'datePayment'
+            ->andWhere("MONTH(p.datePaiement) = :month") // Utilisez le bon nom de champ pour 'datePayment'
+            ->setParameter('user', $userId)
+            ->setParameter('year', $year)
+            ->setParameter('month', $month)
+            ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults(1);
+        return  $qb->getQuery()->getOneOrNullResult();
+    }
+
+    
 
 
     public function findPayemntMoisSelectionne($userId,$year, $month)
@@ -244,17 +352,48 @@ class PaymentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Find a payment by user and month.
+     *
+     * @param User $user
+     * @param string $monthYear
+     * @return Payment|null
+     */
+    public function findPaymentByUserAndMonthnow($user, $monthYear)
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.users = :user')
+            ->andWhere('p.datePaiement = :monthYear')
+            ->setParameter('user', $user)
+            ->setParameter('monthYear', $monthYear)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     // verifier si la table est vide
-    public function isPaymentTableEmpty(): bool
+        public function isPaymentTableEmpty(): bool
+    {
+        $query = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->getQuery();
+
+        $count = $query->getSingleScalarResult();
+
+        return $count === 0;
+    }
+
+    public function findPaymentNombre(): int
 {
     $query = $this->createQueryBuilder('p')
         ->select('COUNT(p.id)')
+        ->andWhere('p.isVerifier = :isVerifier')
+        ->setParameter('isVerifier', false)
         ->getQuery();
 
-    $count = $query->getSingleScalarResult();
-
-    return $count === 0;
+    return (int) $query->getSingleScalarResult();
 }
+
 
 
     //    /**

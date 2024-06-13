@@ -9,7 +9,7 @@
 {% block body %}
     <div class="container-fluid">
         <div class="row justify-content-center mt-4">
-            <div class="col-md-9">
+            <div class="col-md-10">
                 {% if is_granted('ROLE_LOCATEUR') or is_granted('ROLE_GARDIEN') or is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
                 <div class="card shadow">
                     <div class="card-body">
@@ -20,12 +20,12 @@
                                         <tr>
                                             <th scope="col">Période de paiement</th>
                                             <th scope="col">Locataire</th>
-                                            <th scope="col">Paiement validé</th>
-                                            <th scope="col">Paiement attendu</th>
+                                            <th scope="col">Paiement validé (Fcfa)</th>
+                                            <th scope="col">Paiement attendu (Fcfa)</th>
                                             <th scope="col">Date de paiement</th>
                                             <th scope="col">Etat de paiement</th>
-                                            <th scope="col">Etat du compte</th>
-                                            <th scope="col">solde dû</th>
+                                            <th scope="col">Etat du compte (Fcfa)</th>
+                                            <th scope="col">solde dû (Fcfa)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -49,8 +49,21 @@
                                                 <tr>
                                                     <td>{{ trans_day_hash[payment.datePaiement|date('F')] ~ ' ' ~ payment.datePaiement|date('Y') }}</td>
                                                     <td>{{ payment.users.nomDeSociete }}</td>
-                                                    <td><strong>{{ payment.montantPrevu - payment.montantRestant|default(0) }}</strong> F</td>
-                                                    <td><strong>{{ payment.montantRestant|default(0) }}</strong> F</td>
+                                                    <td>
+                                                        {% if payment.montantRestant is empty %}
+                                                            <strong>Traitement encour...</strong>
+                                                        {% else %}
+                                                            <span>{{ ((payment.montantPrevu) - (payment.montantRestant))|number_format(0, ',', ' ') }}</span>
+
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if payment.montantPrevu is empty %}
+                                                            <strong>Traitement encour...</strong>
+                                                        {% else %}
+                                                            <span>{{ payment.montantPrevu|number_format(0, ',', ' ') }}</span>
+                                                        {% endif %}
+                                                    </td>
                                                     <td>{{ payment.datePaiement|date('d-m-Y') }}</td>
                                                     <td>
                                                         <span class="badge 
@@ -62,15 +75,17 @@
                                                         </span>
                                                     </td>
                                                     {% if payment.avancePaiement is empty %}
-                                                        <td><strong>0</strong> F</td>
+                                                        <td><strong>0</strong></td>
                                                     {% else %}
-                                                        {% if payment.avancePaiement >=0 %}
-                                                            <td class="bg-success"><strong>{{ payment.avancePaiement }}</strong> F</td>
+                                                        {% if payment.avancePaiement >0 %}
+                                                            <td class="bg-success"><strong>{{ payment.avancePaiement|number_format(0, ',', ' ') }}</strong></td>
+                                                        {% elseif payment.avancePaiement ==0  %}
+                                                            <td class="bg-secondary"><strong>{{ payment.avancePaiement|number_format(0, ',', ' ') }}</strong></td>
                                                         {% else %}
-                                                            <td class="bg-danger"><strong>{{ payment.avancePaiement }}</strong> F</td>
+                                                            <td class="bg-danger"><strong>{{ payment.avancePaiement|number_format(0, ',', ' ') }}</strong></td>
                                                         {% endif %}
                                                     {% endif %}
-                                                    <td><strong>{{ payment.solde|default(0) }}</strong> F</td>
+                                                    <td><strong>{{ (payment.solde|default(0))|number_format(0, ',', ' ') }}</strong></td>
                                                 </tr>
                                             {% endfor %}
                                         {% else %}
@@ -113,7 +128,7 @@
 				{% endif %}
             </div>
 			
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="text-center mt-3">
                     {% if app.user and app.user.isVerified %}
                         {% if is_granted('ROLE_SUPER_ADMIN') %}
@@ -134,7 +149,12 @@
                             </div>
                         {% endif %}
                         {% elseif is_granted('ROLE_GARDIEN') %}
-                            <a href="{{ path('app_gardinage_index') }}" class="btn btn-warning btn-lg">Accéder à mon espace</a>
+                            <a href="{{ path('app_gardinage_nouvelle') }}" class="btn btn-warning btn-lg">
+                                Accéder à mon espace 
+                                {% if paymentsNombre > 0 %}
+					                <i class="fas fa-bell"> {{paymentsNombre}}</i>
+				                {% endif %}
+                            </a>
                         {% elseif is_granted('ROLE_ADMIN') %}
                             <a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace Admin</a>
                             {% if documents is not empty %}

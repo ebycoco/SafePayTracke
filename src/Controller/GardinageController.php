@@ -28,13 +28,16 @@ class GardinageController extends AbstractController
         //On va chercher le numéro de page dans l'url
 
         $page = $request->query->getInt('page', 1);
-        $paymentsData = $paymentRepository->findPaymentPaginated($page, 4);
+        $paymentsData = $paymentRepository->findPaymentPaginated($page, 12);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
+        
         if (empty($paymentsData)) {
             $this->addFlash('info', "Aucun paiement n'est encour...");
             return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
         }
         return $this->render('gardinage/index.html.twig',  [
             'payments' => $paymentsData,
+            'paymentsNombre' => $paymentsNombre
 
         ]);
     }
@@ -46,12 +49,51 @@ class GardinageController extends AbstractController
 
         $page = $request->query->getInt('page', 1);
         $payments = $paymentRepository->findPaymentHistoryPaginated($page, 4);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
+        if (empty($payments)) {
+            $this->addFlash('info', "Vous n'avez pas d'historique");
+            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+        }
+        return $this->render('gardinage/history.html.twig',  [
+            'payments' => $payments,
+            'paymentsNombre' => $paymentsNombre
+
+        ]);
+    }
+    #[Route('/nouvelle', name: 'nouvelle', methods: ['GET'])]
+    public function nouvelle(PaymentRepository $paymentRepository, Request $request): Response
+    {
+        //On va chercher le numéro de page dans l'url
+
+        $page = $request->query->getInt('page', 1);
+        $payments = $paymentRepository->findPaymentNouvellePaginated($page, 4);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
+        if (empty($payments)) {
+            $this->addFlash('info', "Vous n'avez pas de nouvelle paiement");
+            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+        }
+        return $this->render('gardinage/nouvelle.html.twig',  [
+            'payments' => $payments,
+            'paymentsNombre' => $paymentsNombre
+
+        ]);
+    }
+
+    #[Route('/ajout-montant-prévu', name: 'ajoutMontantPrevu', methods: ['GET'])]
+    public function ajoutMontantPrevu(PaymentRepository $paymentRepository, Request $request): Response
+    {
+        //On va chercher le numéro de page dans l'url
+
+        $page = $request->query->getInt('page', 1);
+        $payments = $paymentRepository->findPaymentAjoutMontantPrevuPaginated($page, 4);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         if (empty($payments)) {
             $this->addFlash('info', "Aucun paiement n'est encour...");
             return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
         }
-        return $this->render('gardinage/history.html.twig',  [
+        return $this->render('gardinage/ajout_montant_prevu.html.twig',  [
             'payments' => $payments,
+            'paymentsNombre' => $paymentsNombre
 
         ]);
     }
@@ -96,6 +138,7 @@ class GardinageController extends AbstractController
 
         $paymentVerification = new PaymentVerification();
         $montantPrevuForm = $payment->getMontantPrevu();
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         $jsfile = "";
         if (empty($montantPrevuForm)) {
             $form = $this->createForm(PaymentVerificationType::class, $paymentVerification);
@@ -202,18 +245,18 @@ class GardinageController extends AbstractController
 
                             // Ajouter un message de succès et rediriger
                             $this->addFlash('success', $message);
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         } catch (\Exception $e) {
                             // Annuler la transaction en cas d'erreur
                             $entityManager->rollback();
                             $this->addFlash('error', "Une erreur est survenue lors de la vérification : " . $e->getMessage());
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
                     } elseif ($typePaiementG == "Anticiper") {
 
                         if (($montantPrevu - $montantRecu) < 0) {
                             $this->addFlash('warning', "Veuillez verifier le montant réçu que vous avez mis ! ");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
 
                         if ($solde == 0) {
@@ -242,33 +285,52 @@ class GardinageController extends AbstractController
                                 $entityManager->persist($payment);
                                 $entityManager->flush();
                                 $this->addFlash('success', "La verification a été effectuer avec success ! ");
-                                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                             } else {
                                 $this->addFlash('warning', "Veuillez verifier le montant réçu que vous avez mis ! ");
-                                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                             }
                         } else {
                             $this->addFlash('warning', "Il a un solde regler il ne peut pas anticiper ce paiement ! ");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
                     } elseif ($typePaiementG == "Retard") {
+                        // dernier paiement
+                        $dernierPaiementOne = $paymentRepository->findSecondLatestDEPaymentByUserOne($user);
+                        $montantRestantPre = $dernierPaiementOne->getMontantRestant();
+                        $montantApaye = $dernierPaiementOne->getMontantAPayer();
+                        $avancePaiementPre = $dernierPaiementOne->getAvancePaiement();
+                        $soldePrece = $dernierPaiementOne->getSolde();
 
-                        $dernierPaiement = $paymentRepository->findSecondLatestDEPaymentByUser($user);
-                        $montantRestant = $payment->getMontantRestant();
+                        
 
-                        if (($montantRestant - $montantRecu) < 0) {
+                        if (($montantRecu - $montantRestantPre) < 0) {
                             $this->addFlash('warning', "Veuillez verifier le montant réçu que vous avez mis ! ");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
-
-                        $montantRestant = ($montantRestant - $montantRecu);
-                        $solde = $solde - $montantRecu;
+                        
+                        if ($montantApaye != $montantRecu) {
+                            $avancePaiement = $avancePaiementPre - $montantRecu;
+                        } else {
+                            $avancePaiement =$avancePaiementPre; 
+                        }
+                        if ($montantRestantPre>=0) {
+                            $montantRestant = $montantPrevu - $montantRecu;
+                        } else {
+                            $montantRestant = ($montantRestantPre - $montantRecu);
+                        } 
+                        if ($soldePrece==0) {
+                            $solde = 0;
+                        } else {
+                            $solde = $solde - $montantRecu;
+                        } 
                         if ($solde >= 0) {
                             $nouveauSolde = $solde;
                             $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
                             $paymentVerification->setPayment($payment);
                             $payment->setMontantRestant($montantRestant);
                             $payment->setMontantAPayer($montantRecu);
+                            $payment->setAvancePaiement($avancePaiement);
                             $payment->setTotalMontantPayer($montantRecu);
                             $payment->setMontantPrevu($montantPrevu);
                             $payment->setVerifier(true);
@@ -285,19 +347,19 @@ class GardinageController extends AbstractController
                             $entityManager->persist($payment);
                             $entityManager->flush();
                             $this->addFlash('success', "La verification a été effectuer avec success ! ");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         } else {
                             $this->addFlash('warning', "Vous ne pouvez pas car il n'a pas de retard dans ces paiement ! ");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
                     }
                 } else {
                     $this->addFlash('warning', "Attention le montant prévu est inferieur au montant que vous avez reçu veuillez reprendre !");
-                    return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                    return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                 }
             } else {
                 $this->addFlash('warning', "Veuillez selectionner le type de paiement que {$entrepise} a indiqué !");
-                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
             }
         }
 
@@ -308,7 +370,8 @@ class GardinageController extends AbstractController
             'mois' => $dateFormatee,
             'montantPrevuForm' => $montantPrevuForm,
             'payment_verification' => $paymentVerification,
-            'form' => $form,
+            'paymentsNombre' => $paymentsNombre,
+            'form' => $form
         ]);
     }
 
@@ -321,6 +384,7 @@ class GardinageController extends AbstractController
     ): Response {
         $paymentVerification = new PaymentVerification();
         $montantPrevuForm = $payment->getMontantPrevu();
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         $form = $this->createForm(PaymentVerificationEditType::class, $paymentVerification);
         $form->handleRequest($request);
         $user = $payment->getUsers();
@@ -341,11 +405,11 @@ class GardinageController extends AbstractController
             $verifMontantSaisirGardien = $montantPrevu - $montantRecu;
             if ($typePaiement !== $typePaiementG) {
                 $this->addFlash('warning', "Veuillez selectionner le type de paiement que {$entrepise} a indiqué !");
-                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
             }
             if ($verifMontantSaisirGardien < 0) {
                 $this->addFlash('warning', "Attention le montant prévu est inferieur au montant que vous avez reçu, veuillez reprendre !");
-                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
             }
             try {
                 $entityManager->beginTransaction();
@@ -370,11 +434,11 @@ class GardinageController extends AbstractController
                         $solde = $payment->getSolde();
                         if ($solde > 0) {
                            $this->addFlash('warning', "Il y a un solde à régler, il ne peut pas anticiper ce paiement !");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
                         if (($montantPrevu - $montantRecu) < 0) {
                             $this->addFlash('warning', "Veuillez vérifier le montant reçu que vous avez mis !");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
                         $payment->setStatus(($montantPrevu - $montantRecu) == 0 ? "Payé" : "partiel");
                         $payment->setMontantRestant(($montantPrevu - $montantRecu) + $montantRestant);
@@ -387,7 +451,7 @@ class GardinageController extends AbstractController
                         $newSolde = $solde - $montantRecu;
                         if ($newSolde < 0) {
                             $this->addFlash('warning', "Vous ne pouvez pas car il n'a pas de retard dans ses paiements !");
-                            return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         }
 
                         $payment->setMontantRestant($montantRestantNouveau);
@@ -403,11 +467,11 @@ class GardinageController extends AbstractController
                 $entityManager->flush();
                 $entityManager->commit();
                 $this->addFlash('success', "La vérification a été effectuée avec succès !");
-                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
             } catch (\Exception $e) {
                 $entityManager->rollback();
                 $this->addFlash('danger', "Une erreur est survenue lors de la vérification : " . $e->getMessage());
-                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
             }
         }
         return $this->render('gardinage/verifier_nouveau.html.twig', [
@@ -415,7 +479,8 @@ class GardinageController extends AbstractController
             'mois' => $dateFormatee,
             'montantPrevuForm' => $montantPrevuForm,
             'payment_verification' => $paymentVerification,
-            'form' => $form,
+            'paymentsNombre' => $paymentsNombre,
+            'form' => $form
         ]);
     }
 
@@ -430,6 +495,7 @@ class GardinageController extends AbstractController
     {
         $paymentVerification = new PaymentVerification();
         $form = $this->createForm(PaymentVerificationEditRetardType::class, $paymentVerification);
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
         $form->handleRequest($request);
         $user = $payment->getUsers();
         $dernierPaiement = $paymentRepository->findSecondLatestPaymentByUser($user);
@@ -449,7 +515,7 @@ class GardinageController extends AbstractController
             $montantPrevu = $form->getData()->getMontantPrevu();
             $typePaiementG = "Retard";
             $verifMontantSaisirGardien = $montantPrevu - $montantRecu;
-            if ($typePaiement !== $typePaiementG) {
+            if ($typePaiement != $typePaiementG) {
                 $this->addFlash('warning', "Veuillez selectionner le type de paiement que {$entrepise} a indiqué !");
                 return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
             }
@@ -516,7 +582,8 @@ class GardinageController extends AbstractController
             'payment' => $payment,
             'mois' => $dateFormatee,
             'payment_verification' => $paymentVerification,
-            'form' => $form,
+            'paymentsNombre' => $paymentsNombre,
+            'form' => $form
         ]);
     }
 }

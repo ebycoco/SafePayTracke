@@ -57,12 +57,12 @@
                                     </td>
                                     <td>
                                         {% if payment.montantRestant is empty %}
-                                            <strong>{{ payment.montantAPayer }}</strong> F
+                                            <strong>{{ payment.montantAPayer|number_format(0, ',', ' ') }}</strong> F
                                         {% else %}
-                                            <strong>{{ payment.montantPrevu - payment.montantRestant }}</strong> F
+                                            <strong>{{ (payment.montantPrevu - payment.montantRestant)|number_format(0, ',', ' ') }}</strong> F
                                         {% endif %}
                                     </td>
-                                    <td>{{ payment.montantRestant is not empty ? payment.montantRestant : '0' }} F</td>
+                                    <td>{{ (payment.montantRestant is not empty ? payment.montantRestant : '0')|number_format(0, ',', ' ') }} F</td>
                                     <td>{{ payment.datePaiement|date('d-m-Y') }}</td>
                                     <td>
                                         {% set badgeClass = {

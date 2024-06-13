@@ -11,7 +11,7 @@
 			<h1>Modifier Paiement</h1>
 			<div class="col-md-8">
 			{% if payment.montantRestant is not empty %}
-				<p> Vous le montant que vous devrer: <strong class="text-primary">{{payment.montantRestant}} Fcfa</strong></p> 
+				<p> Vous le montant que vous devrer: <strong class="text-primary">{{payment.montantRestant|number_format(0, ',', ' ')}} Fcfa</strong></p> 
 			{% endif %}
 			{{ form_start(form,{'attr':{'id': 'payment-form'}}) }}
 						{{ form_row(form.montantAPayer, {'attr': {'name': 'payment-amount','id': 'payment-amount'}}) }}
