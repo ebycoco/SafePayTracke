@@ -40,9 +40,9 @@
 							<thead class="table-primary">
 								<tr>
 									<th scope="col">Période de paiement</th>
-									<th scope="col">Paiement attendu du mois</th> 
+									<th scope="col">Paiement attendu du mois (Fcfa)</th> 
 									<th scope="col">Etat de paiement</th>
-									<th scope="col">Solde dû</th>
+									<th scope="col">Solde dû (Fcfa)</th>
 									<th scope="col">Action</th>
 								</tr>
 							</thead>
@@ -72,7 +72,7 @@
 										{% if paiement.montantRestant is empty %}
 											<span class="badge bg-info">Non définir</span>
 										{% else %}
-											{{paiement.montantRestant|number_format(0, ',', ' ')}} F
+											{{paiement.montantRestant|number_format(0, ',', ' ')}}
 										{% endif %}
 
 										</td>
@@ -86,7 +86,7 @@
 										{% endif %} 
 										</td>
 										<td>
-											{{paiement.solde}} F
+											{{paiement.solde|number_format(0, ',', ' ')}}
 										</td>
 										<td> 
 										{% if paiement.montantAPayer == 0 %}

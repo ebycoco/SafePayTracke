@@ -212,7 +212,9 @@ class PaymentRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.users = :user')
+            ->andWhere('p.isVerifier = :verifier')
             ->setParameter('user', $user)
+            ->setParameter('verifier', true)
             ->orderBy('p.datePaiement', 'DESC')
             ->setMaxResults(2) // Récupérer les deux paiements les plus récents
             ->getQuery()
@@ -222,12 +224,15 @@ class PaymentRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.users = :user')
+            ->andWhere('p.isVerifier = :verifier')
             ->setParameter('user', $user)
+            ->setParameter('verifier', true)
             ->orderBy('p.datePaiement', 'DESC')
             ->setMaxResults(2) // Récupérer les deux paiements les plus récents
             ->getQuery()
-            ->getResult()[0] ?? null; // Obtenir le premier résultat
+            ->getResult()[1] ?? null; // Obtenir le deuxième  résultat
     }
+ 
     public function findSecondLatestDEPaymentByUserCi(User $user): ?Payment
     {
         return $this->createQueryBuilder('p')

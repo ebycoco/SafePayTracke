@@ -25,11 +25,11 @@
                         <thead class="table-primary">
                             <tr>
                                 <th scope="col">Période de paiement</th>
-                                <th scope="col">Montant payé</th>
-                                <th scope="col">Reste payé</th>
+                                <th scope="col">Montant validé (Fcfa)</th>
+								<th scope="col">Montant attendu (Fcfa)</th>
                                 <th scope="col">Date de paiement</th>
                                 <th scope="col">Etat de paiement</th>
-                                <th scope="col">Crédit total</th>
+                                <th scope="col">Solde dû</th>
                                 <th scope="col">Action</th>
                                 <th scope="col">Voir le reçu</th>
                             </tr>
@@ -56,13 +56,21 @@
                                         {{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
                                     </td>
                                     <td>
-                                        {% if payment.montantRestant is empty %}
-                                            <strong>{{ payment.montantAPayer|number_format(0, ',', ' ') }}</strong> F
-                                        {% else %}
-                                            <strong>{{ (payment.montantPrevu - payment.montantRestant)|number_format(0, ',', ' ') }}</strong> F
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ (payment.montantRestant is not empty ? payment.montantRestant : '0')|number_format(0, ',', ' ') }} F</td>
+										{% if payment.montantRestant is empty %}
+											<strong>Traitement encour...</strong>
+										{% else %}
+											<strong>{{ ((payment.montantPrevu) - (payment.montantRestant))|number_format(0, ',', ' ') }}</strong>
+											
+										{% endif %}
+									</td>
+									<td>
+										{% if payment.montantPrevu is empty %}
+											<strong>Traitement encour...</strong>
+										{% else %}
+											<strong>{{ payment.montantPrevu|number_format(0, ',', ' ') }}</strong>
+											
+										{% endif %}
+									</td>
                                     <td>{{ payment.datePaiement|date('d-m-Y') }}</td>
                                     <td>
                                         {% set badgeClass = {
@@ -72,7 +80,7 @@
                                         }[payment.status] | default('success') %}
                                         <span class="badge bg-{{ badgeClass }}">{{ payment.status }}</span>
                                     </td>
-                                    <td>{{ payment.solde is not empty ? payment.solde : '0' }} F</td>
+                                    <td>{{ (payment.solde is not empty ? payment.solde : '0')|number_format(0, ',', ' ') }} F</td>
                                     <td>
                                         {% set dateFormatee = payment.datePaiement|date('F Y') %}
                                         {% if payment.status == 'Payé' %}

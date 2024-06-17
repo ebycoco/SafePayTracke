@@ -48,8 +48,8 @@ class GardinageController extends AbstractController
         //On va chercher le numéro de page dans l'url
 
         $page = $request->query->getInt('page', 1);
+        $paymentsNombre = $paymentRepository->findPaymentNombre(); 
         $payments = $paymentRepository->findPaymentHistoryPaginated($page, 4);
-        $paymentsNombre = $paymentRepository->findPaymentNombre();
         if (empty($payments)) {
             $this->addFlash('info', "Vous n'avez pas d'historique");
             return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
@@ -65,9 +65,9 @@ class GardinageController extends AbstractController
     {
         //On va chercher le numéro de page dans l'url
 
-        $page = $request->query->getInt('page', 1);
-        $payments = $paymentRepository->findPaymentNouvellePaginated($page, 4);
+        $page = $request->query->getInt('page', 1); 
         $paymentsNombre = $paymentRepository->findPaymentNombre();
+        $payments = $paymentRepository->findPaymentNouvellePaginated($page, 4);
         if (empty($payments)) {
             $this->addFlash('info', "Vous n'avez pas de nouvelle paiement");
             return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
@@ -244,6 +244,12 @@ class GardinageController extends AbstractController
                             $entityManager->commit();
 
                             // Ajouter un message de succès et rediriger
+                            $page = $request->query->getInt('page', 1); 
+                            $payments = $paymentRepository->findPaymentNouvellePaginated($page, 4);
+                            if (empty($payments)) {
+                                $this->addFlash('success', $message);
+                                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            }
                             $this->addFlash('success', $message);
                             return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         } catch (\Exception $e) {
@@ -284,6 +290,12 @@ class GardinageController extends AbstractController
                                 $entityManager->persist($paymentVerification);
                                 $entityManager->persist($payment);
                                 $entityManager->flush();
+                                $page = $request->query->getInt('page', 1); 
+                                $payments = $paymentRepository->findPaymentNouvellePaginated($page, 4);
+                                if (empty($payments)) {
+                                    $this->addFlash('success', "La verification a été effectuer avec success ! ");
+                                    return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                                }
                                 $this->addFlash('success', "La verification a été effectuer avec success ! ");
                                 return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                             } else {
@@ -302,7 +314,6 @@ class GardinageController extends AbstractController
                         $avancePaiementPre = $dernierPaiementOne->getAvancePaiement();
                         $soldePrece = $dernierPaiementOne->getSolde();
 
-                        
 
                         if (($montantRecu - $montantRestantPre) < 0) {
                             $this->addFlash('warning', "Veuillez verifier le montant réçu que vous avez mis ! ");
@@ -346,6 +357,12 @@ class GardinageController extends AbstractController
                             $entityManager->persist($paymentVerification);
                             $entityManager->persist($payment);
                             $entityManager->flush();
+                            $page = $request->query->getInt('page', 1); 
+                            $payments = $paymentRepository->findPaymentNouvellePaginated($page, 4);
+                            if (empty($payments)) {
+                                $this->addFlash('success', "La verification a été effectuer avec success ! ");
+                                return $this->redirectToRoute('app_gardinage_index', [], Response::HTTP_SEE_OTHER);
+                            }
                             $this->addFlash('success', "La verification a été effectuer avec success ! ");
                             return $this->redirectToRoute('app_gardinage_nouvelle', [], Response::HTTP_SEE_OTHER);
                         } else {

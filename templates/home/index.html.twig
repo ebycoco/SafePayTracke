@@ -133,12 +133,12 @@
                     {% if app.user and app.user.isVerified %}
                         {% if is_granted('ROLE_SUPER_ADMIN') %}
 						<a href="{{ path('app_admin_index') }}" class="btn btn-info btn-lg">Accéder à mon espace Admin</a>
-                        {% if documents is not empty %}
+                        {% if documents is not empty  %}
                             <div class="container mt-4">
                                 <div class="document-list">
                                     {% for document in documents %}
                                         <div class="document-item mb-3">
-                                            <p>{{ document.typeDocument }}</p>
+                                            <p>{{ document.name }}</p>
                                             <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
                                             {% if not loop.last %}
                                                 <hr/>
@@ -162,7 +162,7 @@
                                     <div class="document-list">
                                         {% for document in documents %}
                                             <div class="document-item mb-3">
-                                                <p>{{ document.typeDocument }}</p>
+                                                <p>{{ document.name }}</p>
                                                 <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
                                                 {% if not loop.last %}
                                                     <hr/>
@@ -179,7 +179,7 @@
                                     <div class="document-list">
                                         {% for document in documents %}
                                             <div class="document-item mb-3">
-                                                <p>{{ document.typeDocument }}</p>
+                                                <p>{{ document.name }}</p>
                                                 <a href="{{ path('app_document_download', {'id': document.id}) }}" class="btn btn-primary">Télécharger</a>
                                                 {% if not loop.last %}
                                                     <hr/>

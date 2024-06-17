@@ -76,25 +76,25 @@
                                         <button class="btn btn-danger">Supprimer</button>
                                     </form> #}
                                     <div class="modal fade" id="deleteModal{{ document.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ document.id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="post" action="{{ path('app_admin_delete_doc', {'id': document.id}) }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel{{ document.id }}">Confirmation de suppression</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Êtes-vous sûr de vouloir supprimer ce document ?
-                </div>
-                <div class="modal-footer d-flex justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-danger">Oui</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+                                        <div class="modal-dialog">
+                                            <form method="post" action="{{ path('app_admin_delete_doc', {'id': document.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ document.id) }}">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ document.id }}">Confirmation de suppression</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Êtes-vous sûr de vouloir supprimer ce document ?
+                                                    </div>
+                                                    <div class="modal-footer d-flex justify-content-center">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        <button type="submit" class="btn btn-danger">Oui</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
 
                                 </div>
                                 <!-- Modal -->

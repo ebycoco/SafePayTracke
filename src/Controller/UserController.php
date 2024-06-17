@@ -41,7 +41,7 @@ class UserController extends AbstractController
         $paymentsNombre = $paymentRepository->findPaymentNombre();
         return $this->render('admin/document.html.twig', [
             'paymentsNombre' => $paymentsNombre,
-            'documents' => $documentRepository->findAll(),
+            'documents' => $documentRepository->findByDocumentAll(),
         ]);
     }
 

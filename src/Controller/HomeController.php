@@ -30,12 +30,13 @@ class HomeController extends AbstractController
         $role = 'ROLE_LOCATEUR';
         $nombreUtilisateurs = $userRepository->countUsersByRole($role);
         $paymentsData  = $paymentRepository->findPaymentPaginated($page,8);
+        $documentData  = $documentRepository->findByDocument();
         $paymentsNombre = $paymentRepository->findPaymentNombre();
         return $this->render('home/index.html.twig', [
             'nombreUtilisateurs' => $nombreUtilisateurs,
             'paymentsNombre' => $paymentsNombre,
             'payments' => $paymentsData,
-            'documents' => $documentRepository->findAll(),
+            'documents' => $documentData,
             'userRoles' => $this->getUser()->getRoles(),
         ]);
     }
