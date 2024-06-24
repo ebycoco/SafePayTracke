@@ -25,7 +25,7 @@
                                             <th scope="col">Date de paiement</th>
                                             <th scope="col">Etat de paiement</th>
                                             <th scope="col">Etat du compte (Fcfa)</th>
-                                            <th scope="col">solde dû (Fcfa)</th>
+                                            {# <th scope="col">solde dû (Fcfa)</th> #}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -85,7 +85,7 @@
                                                             <td class="bg-danger"><strong>{{ payment.avancePaiement|number_format(0, ',', ' ') }}</strong></td>
                                                         {% endif %}
                                                     {% endif %}
-                                                    <td><strong>{{ (payment.solde|default(0))|number_format(0, ',', ' ') }}</strong></td>
+                                                    {# <td><strong>{{ (payment.solde|default(0))|number_format(0, ',', ' ') }}</strong></td> #}
                                                 </tr>
                                             {% endfor %}
                                         {% else %}

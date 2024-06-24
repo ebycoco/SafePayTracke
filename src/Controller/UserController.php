@@ -88,9 +88,8 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'delete_doc', methods: ['POST'])]
-    public function deleteDoc(PaymentRepository $paymentRepository,Request $request, Document $document, EntityManagerInterface $entityManager): Response
+    public function deleteDoc(Request $request, Document $document, EntityManagerInterface $entityManager): Response
     {
-        $paymentsNombre = $paymentRepository->findPaymentNombre();
         if ($this->isCsrfTokenValid('delete'.$document->getId(), $request->getPayload()->get('_token'))) {
             $entityManager->remove($document);
             $entityManager->flush();
@@ -151,11 +150,10 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'delete', methods: ['POST'])]
-    public function delete(PaymentRepository $paymentRepository,Request $request, User $user, EntityManagerInterface $entityManager): Response
+    #[Route('/user/{id}', name: 'delete_user', methods: ['POST'])]
+    public function deleteUser(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        $paymentsNombre = $paymentRepository->findPaymentNombre();
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_user'.$user->getId(), $request->getPayload()->get('_token'))) {
             $entityManager->remove($user);
             $entityManager->flush();
         }

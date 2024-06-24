@@ -210,8 +210,13 @@ class GardinageController extends AbstractController
                             $solde = $montantRestant + $solde;
                             $nouveauSolde = $solde;
 
-                            // Mettre à jour le solde de l'utilisateur
-                            $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
+                                /**
+                             * fonctionnalité pour pour mettre a jour tous les soldes 
+                             */
+
+                            // $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
+                            $paymentVerification->setPayment($payment);
+                            $payment->setSolde($nouveauSolde);
 
                             // Mettre à jour les informations de vérification du paiement
                             $payment->setMontantRestant($montantRestant);
@@ -271,8 +276,12 @@ class GardinageController extends AbstractController
                             $solde = $montantRestant + $solde;
                             if ($solde >= 0) {
                                 $nouveauSolde = $solde;
-                                $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
+                                /**
+                                 * fonctionnalité pour pour mettre a jour tous les soldes 
+                                 */
+                                // $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
                                 $paymentVerification->setPayment($payment);
+                                $payment->setSolde($nouveauSolde);
                                 $payment->setMontantRestant($montantRestant);
                                 $payment->setMontantAPayer($montantRecu);
                                 $payment->setTotalMontantPayer($montantRecu);
@@ -337,8 +346,12 @@ class GardinageController extends AbstractController
                         } 
                         if ($solde >= 0) {
                             $nouveauSolde = $solde;
-                            $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
+                            /**
+                             * fonctionnalité pour pour mettre a jour tous les soldes 
+                             */
+                            // $paymentRepository->updateSoldeForUser($user, $nouveauSolde);
                             $paymentVerification->setPayment($payment);
+                            $payment->setSolde($nouveauSolde); 
                             $payment->setMontantRestant($montantRestant);
                             $payment->setMontantAPayer($montantRecu);
                             $payment->setAvancePaiement($avancePaiement);
@@ -480,7 +493,8 @@ class GardinageController extends AbstractController
                 }
                 $entityManager->persist($paymentVerification);
                 $entityManager->persist($payment);
-                $paymentRepository->updateSoldeForUser($user, $payment->getSolde() );
+                $payment->setSolde($payment->getSolde());
+                // $paymentRepository->updateSoldeForUser($user, $payment->getSolde() );
                 $entityManager->flush();
                 $entityManager->commit();
                 $this->addFlash('success', "La vérification a été effectuée avec succès !");
@@ -583,7 +597,8 @@ class GardinageController extends AbstractController
                 }
                 $entityManager->persist($paymentVerification);
                 $entityManager->persist($payment);
-                $paymentRepository->updateSoldeForUser($user, $payment->getSolde() );
+                $payment->setSolde($payment->getSolde());
+                // $paymentRepository->updateSoldeForUser($user, $payment->getSolde() );
                 $entityManager->flush();
                 $entityManager->commit();
                 $this->addFlash('success', "L'ajout du montant prévu a été effectuée avec succès !");

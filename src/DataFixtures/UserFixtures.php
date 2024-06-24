@@ -23,7 +23,7 @@ class UserFixtures extends Fixture
             ['email' => 'd2a@gmail.com', 'password' => '123456', 'numero' => '0987654321', 'nomDeSociete' => 'D2A', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
             ['email' => 'ndoumy@gmail.com', 'password' => '123456', 'numero' => '1122334455', 'nomDeSociete' => 'M.Ndoumy', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
             ['email' => 'gemica@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'GEMICA', 'isVerified' => true, 'roles' => ['ROLE_LOCATEUR']],
-            ['email' => 'info@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'DUNAMIST SECURITY', 'isVerified' => true, 'roles' => ['ROLE_GARDIEN']],
+            ['email' => 'info@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'DUNAMIS SECURITY', 'isVerified' => true, 'roles' => ['ROLE_GARDIEN']],
             ['email' => 'brouyaoeric7@gmail.com', 'password' => '123456', 'numero' => '5566778899', 'nomDeSociete' => 'AROA', 'isVerified' => true, 'roles' => ['ROLE_ADMIN']],
         ];
 

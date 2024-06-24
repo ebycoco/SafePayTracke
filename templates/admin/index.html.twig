@@ -63,7 +63,10 @@
                                                     Attribuer role
                                                 </a>
                                             {% endif %}
-                                                {{ include('admin/_delete_form.html.twig') }}
+                                                <form method="post" action="{{ path('app_admin_delete_user', {'id': user.id}) }}" onsubmit="return confirm('Etre vous sûr de vouloir suprimer {{user.nomDeSociete}} ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_user' ~ user.id) }}">
+                                                    <button class="btn btn-danger">Supprimer</button>
+                                                </form>
                                             </div>
                                         {% endif %}
                                     </td>

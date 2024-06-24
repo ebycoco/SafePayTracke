@@ -95,7 +95,13 @@
 											{% if paiement.montantSaisir >0 %}
 												<button type="button" class="btn btn-primary btn-sm" disabled>attente</button>
 											{% else %}
-												<a href="{{ path('app_edit_paiement', {'id': paiement.id}) }}" class="btn btn-success btn-sm">Payer</a>
+												{% if paiement.montantAPayer > 0 %}
+													<a href="{{ path('app_retard_paiement', {'id': paiement.id}) }}" class="btn btn-danger btn-sm">Payer</a>
+												{% else %}
+												<button type="button" class="btn btn-primary btn-sm" disabled>attente</button>
+												{# <a href="{{ path('app_edit_paiement', {'id': paiement.id}) }}" class="btn btn-success btn-sm">Payer</a> #}
+
+												{% endif %}
 											{% endif %}
 										{% endif %}
 										</td>
