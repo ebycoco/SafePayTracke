@@ -7,6 +7,7 @@ framework:
     handle_all_throwables: true
 
     default_locale: 'fr'  # Ajoutez cette ligne pour définir la locale par défaut
+    
     translator:
         default_path: '%kernel.project_dir%/translations'
         fallbacks: ['fr']

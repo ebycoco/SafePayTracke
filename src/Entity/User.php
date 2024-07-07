@@ -55,6 +55,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'users')]
     private Collection $payments;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $lastLogin = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $resetToken = null;
 
@@ -210,6 +213,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $payment->setUsers(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLastLogin(): ?\DateTimeInterface
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTimeInterface $lastLogin): self
+    {
+        $this->lastLogin = $lastLogin;
 
         return $this;
     }

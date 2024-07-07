@@ -55,7 +55,7 @@ class DocumentRepository extends ServiceEntityRepository
        {
            return $this->createQueryBuilder('d')
                ->orderBy('d.id', 'DESC')
-               ->setMaxResults(12)
+               ->setMaxResults(36)
                ->getQuery()
                ->getResult()
            ;

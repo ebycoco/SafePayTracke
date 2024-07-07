@@ -126,45 +126,50 @@ class ProfileController extends AbstractController
         ]);
     }
 
-    #[Route('/modifier-profil', name: 'modifier_profil',methods: ['GET', 'POST'])]
-    public function modifierProfil(
-        Request $request,
-        PaymentRepository $paymentRepository,
-        EntityManagerInterface $entityManager
-        ): Response
-    {
-        
-        $user = $this->getUser(); // Récupérer l'utilisateur actuellement connecté
-         // Récupérer l'utilisateur connecté
-         $utilisateurConnecte = $this->getUser();
-         $paymentsNombre = $paymentRepository->findPaymentNombre();
-        
-         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
-         if (!$utilisateurConnecte) {
-             return $this->redirectToRoute('app_login');
-         }
- 
-         
-        $NomDeSociete= $utilisateurConnecte->getNomDeSociete();
-        $form = $this->createForm(UserModiType::class, $user);
+    #[Route('/modifier-profil', name: 'modifier_profil', methods: ['GET', 'POST'])]
+public function modifierProfil(
+    Request $request,
+    PaymentRepository $paymentRepository,
+    EntityManagerInterface $entityManager
+): Response {
+    // Récupérer l'utilisateur connecté
+    $user = $this->getUser();
+    
+    // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
+    if (!$user) {
+        return $this->redirectToRoute('app_login');
+    }
 
-        $form->handleRequest($request);
+    // Récupérer les informations supplémentaires
+    $NomDeSociete = $user->getNomDeSociete();
+    $paymentsNombre = $paymentRepository->findPaymentNombre();
 
-        if ($form->isSubmitted() && $form->isValid()) {
+    // Créer et gérer le formulaire
+    $form = $this->createForm(UserModiType::class, $user);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        try {
             $entityManager->persist($user);
             $entityManager->flush();
-
             $this->addFlash('success', 'Votre profil a été mis à jour avec succès.');
             return $this->redirectToRoute('app_profile', [], Response::HTTP_SEE_OTHER);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Une erreur s\'est produite lors de la mise à jour de votre profil.');
+            // Log the error message for debugging
+            error_log($e->getMessage());
         }
-
-        return $this->render('profile/modifier_profil.html.twig', [
-            'user' => $user,
-            'NomDeSociete'=> $NomDeSociete,
-            'paymentsNombre' => $paymentsNombre,
-            'form' => $form
-        ]);
     }
+
+    return $this->render('profile/modifier_profil.html.twig', [
+        'user' => $user,
+        'NomDeSociete' => $NomDeSociete,
+        'paymentsNombre' => $paymentsNombre,
+        'form' => $form->createView(),
+    ]);
+}
+
+
 
     #[Route('/paiement', name: 'app_paiement')]
     public function paiement(

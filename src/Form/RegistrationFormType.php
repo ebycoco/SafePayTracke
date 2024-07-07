@@ -31,7 +31,7 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('numero',NumberType::class, [
+            ->add('numero',TextType::class, [
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Veuillez entrer un numéro',

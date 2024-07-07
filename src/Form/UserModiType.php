@@ -28,13 +28,14 @@ class UserModiType extends AbstractType
                     ]),
                 ],
             ])
-            ->add('numero',NumberType::class, [
+            ->add('numero',TextType::class, [
                 'constraints' => [
                     new Assert\NotBlank([
                         'message' => 'Le numéro ne peut pas être vide.',
                     ]),
-                    new Assert\Positive([
-                        'message' => 'Le numéro doit être positif.',
+                    new Assert\GreaterThanOrEqual([
+                        'value' => 0,
+                        'message' => 'Le numéro doit être supérieur ou égal à zéro.',
                     ]),
                 ],
             ])

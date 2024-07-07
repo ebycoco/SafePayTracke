@@ -18,11 +18,8 @@ class ResetPasswordFormType extends AbstractType
                 'label' => 'Entrez votre mot de passe',
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Veuillez entrer une adresse email',
-                    ]),
-                    new Assert\Email([
-                        'message' => 'Veuillez entrer une adresse email valide',
-                    ]),
+                        'message' => 'le mot de passe ne peut pas être vide.',
+                    ]), 
                 ],
                 'attr' => [
                     'class' => 'form-control'
