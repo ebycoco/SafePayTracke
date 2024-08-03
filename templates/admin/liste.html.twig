@@ -15,11 +15,8 @@
                     <thead>
                         <tr>
                             <th>Email</th>
-                            <th>Roles</th>
-                            <th>Télephone</th>
-                            <th>Societe</th>
-                            <th>Compte vérifier</th>
-                            {# <th>Dernière connexion</th> #}
+                            <th>Réinitialiser </th>
+                            <th>Dernière connexion</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -43,30 +40,9 @@
                                 <tr>
                                     <td>{{ user.email }}</td>
                                     <td>
-                                        {% for role in user.roles %}
-                                            {% set name = '' %}
-                                            {% if role == 'ROLE_ADMIN' %}
-                                                {% set name = 'Administrateur' %}
-                                                <span class="badge bg-info">{{ name }}</span>
-                                            {% elseif role == 'ROLE_LOCATEUR' %}
-                                                {% set name = 'Locataire' %}
-                                                <span class="badge bg-success">{{ name }}</span>
-                                            {% elseif role == 'ROLE_GARDIEN' %}
-                                                {% set name = 'Gardienage' %}
-                                                <span class="badge bg-warning">{{ name }}</span>
-                                            {% endif %}
-                                        {% endfor %}
+                                        {{ user }}
                                     </td>
-                                    <td>{{ user.numero }}</td>
-                                    <td>{{ user.nomDeSociete }}</td>
                                     <td>
-                                    {% if user.isVerified =="1" %}
-                                        <span  class="badge bg-success"> Oui</span>
-                                    {% else %}
-                                        <span class="badge bg-danger"> Non</span>
-                                    {% endif %} 
-                                    </td>
-                                    {# <td>
                                          {% if user.lastLogin %}
                                             {% set day = user.lastLogin|date('d') %}
                                             {% set month = user.lastLogin|date('F') %}
@@ -75,7 +51,7 @@
                                         {% else %}
                                             Jamais
                                         {% endif %}
-                                    </td> #}
+                                    </td>
                                     <td>
                                         {% if app.user.id == user.id %}
                                             <button class="btn btn-warning" disabled>Impossible</button>
@@ -84,14 +60,10 @@
                                             {% if user.isVerified == "0" %}
                                                 <button type="button" class="btn btn-secondary me-2" disabled> Attribuer role</button>
                                             {% else %}
-                                                <a href="{{ path('app_admin_edit', {'id': user.id}) }}" class="btn btn-primary me-2">
-                                                    Attribuer role
-                                                </a>
-                                            {% endif %}
-                                                <form method="post" action="{{ path('app_admin_delete_user', {'id': user.id}) }}" onsubmit="return confirm('Etre vous sûr de vouloir suprimer {{user.nomDeSociete}} ?');">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_user' ~ user.id) }}">
-                                                    <button class="btn btn-danger">Supprimer</button>
-                                                </form>
+                                               <a href="{{ path('app_admin_reset_password', {id: user.id}) }}" class="btn btn-primary me-2">
+                                        Réinitialiser
+                                    </a>
+                                            {% endif %} 
                                             </div>
                                         {% endif %}
                                     </td>
