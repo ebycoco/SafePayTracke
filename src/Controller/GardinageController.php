@@ -5,6 +5,7 @@ namespace App\Controller;
 use DateTimeImmutable;
 use IntlDateFormatter;
 use App\Entity\Payment;
+use App\Repository\UserRepository;
 use App\Entity\PaymentVerification;
 use App\Form\PaymentVerificationType;
 use App\Repository\PaymentRepository;
@@ -23,13 +24,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class GardinageController extends AbstractController
 {
     #[Route('/', name: 'index', methods: ['GET'])]
-    public function index(PaymentRepository $paymentRepository, Request $request): Response
+    public function index(PaymentRepository $paymentRepository, Request $request,UserRepository $userRepository): Response
     {
         //On va chercher le numéro de page dans l'url
 
         $page = $request->query->getInt('page', 1);
         $paymentsData = $paymentRepository->findPaymentPaginated($page, 12);
         $paymentsNombre = $paymentRepository->findPaymentNombre();
+        $NouveauNombre = $userRepository->findNouveauNombre();
         
         if (empty($paymentsData)) {
             $this->addFlash('info', "Aucun paiement n'est encour...");
@@ -37,7 +39,8 @@ class GardinageController extends AbstractController
         }
         return $this->render('gardinage/index.html.twig',  [
             'payments' => $paymentsData,
-            'paymentsNombre' => $paymentsNombre
+            'paymentsNombre' => $paymentsNombre,
+            'NouveauNombre' => $NouveauNombre
 
         ]);
     }

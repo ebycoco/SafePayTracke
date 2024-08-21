@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Entity\Document;
+use App\Entity\Payment;
 use App\Form\SignaleType;
 use App\Form\DocumentType;
 use App\Form\UserEditRoleType;
@@ -147,17 +148,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(PaymentRepository $paymentRepository,User $user,UserRepository $userRepository): Response
-    {
-        $paymentsNombre = $paymentRepository->findPaymentNombre();
-        $NouveauNombre = $userRepository->findNouveauNombre();
-        return $this->render('admin/show.html.twig', [
-            'paymentsNombre' => $paymentsNombre,
-            'NouveauNombre' => $NouveauNombre,
-            'user' => $user,
-        ]);
-    }
+   
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
     public function edit(PaymentRepository $paymentRepository,Request $request, User $user, EntityManagerInterface $entityManager,UserRepository $userRepository): Response
@@ -192,15 +183,27 @@ class UserController extends AbstractController
         return $this->redirectToRoute('app_admin_index', [], Response::HTTP_SEE_OTHER);
     }
     #[Route('/reset-password/liste', name: 'reset_password_liste', methods: ['GET', 'POST'])]
-    public function resetPasswordAdmin(PaymentRepository $paymentRepository,UserRepository $userRepository)
+    public function resetPasswordAdmin(PaymentRepository $paymentRepository,UserRepository $userRepository,Request $request)
     {
         $utilisateurConnecte = $this->getUser();
         $NomDeSociete= $utilisateurConnecte->getNomDeSociete();
         $paymentsNombre = $paymentRepository->findPaymentNombre();
         $NouveauNombre = $userRepository->findNouveauNombre();
+        // Récupérer le numéro de la page à afficher
+        $page = $request->query->getInt('page', 1); // Par défaut, la première page est affichée
+
+        // Définir le nombre d'éléments par page
+        $limit = 4;
+        $users =$userRepository->findUserliste($page,$limit);
+        
+        $totalPaiements = $userRepository->count();
+        // Calculer le nombre total de pages
+        $totalPages = ceil($totalPaiements / $limit);
         return $this->render('admin/liste.html.twig', [
             'NomDeSociete'=> $NomDeSociete,
-            'users' => $userRepository->findAll(),
+            'users' => $users,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
             'paymentsNombre' => $paymentsNombre,
             'NouveauNombre' => $NouveauNombre
         ]);
@@ -228,5 +231,45 @@ class UserController extends AbstractController
             'user' => $user,
             'resetPasswordForm' => $form->createView(),
         ]);
+    }
+
+    #[Route('/liste-paiement', name: 'paiement_liste_Super', methods: ['GET'])]
+    public function paiementListe(PaymentRepository $paymentRepository,UserRepository $userRepository,Request $request): Response
+    {
+        $paymentsNombre = $paymentRepository->findPaymentNombre();
+        $NouveauNombre = $userRepository->findNouveauNombre();
+        // Récupérer le numéro de la page à afficher
+        $page = $request->query->getInt('page', 1); // Par défaut, la première page est affichée
+
+        // Définir le nombre d'éléments par page
+        $limit = 4;
+        $payments = $paymentRepository->findPaymentListe($page,$limit);
+        $totalPaiements = $paymentRepository->count();
+         // Calculer le nombre total de pages
+         $totalPages = ceil($totalPaiements / $limit);
+        return $this->render('admin/payment_liste.html.twig', [
+            'payments' => $payments,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'paymentsNombre' => $paymentsNombre,
+            'NouveauNombre' => $NouveauNombre
+        ]);
+    }
+
+    #[Route('/paiement/{id}', name: 'payment_delete', methods: ['POST'])]
+    public function delete(Request $request, Payment $payment, EntityManagerInterface $entityManager): Response
+    {
+
+        if ($this->isCsrfTokenValid('delete'.$payment->getId(), $request->getPayload()->get('_token'))) {
+        // Supprimer la PaymentVerification associée
+        $verification = $payment->getPaymentVerification();
+        if ($verification) {
+            $entityManager->remove($verification);
+        }
+            $entityManager->remove($payment);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_admin_paiement_liste_Super', [], Response::HTTP_SEE_OTHER);
     }
 }

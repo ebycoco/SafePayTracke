@@ -25,17 +25,16 @@ class ProfileController extends AbstractController
 {
 
     #[Route('/profile', name: 'app_profile')] 
-    public function profile(PaymentRepository $paymentRepository,Request $request): Response
+    public function profile(PaymentRepository $paymentRepository,Request $request,UserRepository $userRepository): Response
     {
          // Récupérer l'utilisateur connecté
         $utilisateurConnecte = $this->getUser();
-        
+        $NouveauNombre = $userRepository->findNouveauNombre();
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
         }
 
-        
         // Récupérer le numéro de la page à afficher
         $page = $request->query->getInt('page', 1); // Par défaut, la première page est affichée
 
@@ -54,7 +53,8 @@ class ProfileController extends AbstractController
             'paiements' => $paiements,
             'totalPages' => $totalPages,
             'paymentsNombre' => $paymentsNombre,
-            'currentPage' => $page
+            'currentPage' => $page,
+            'NouveauNombre' => $NouveauNombre,
         ]);
     }
 
@@ -65,7 +65,8 @@ class ProfileController extends AbstractController
         TokenGeneratorInterface $tokenGenerator,
         EntityManagerInterface $entityManager,
         PaymentRepository $paymentRepository,
-        SendMailService $mail
+        SendMailService $mail,
+        UserRepository $userRepository
     ):Response
     {
          // Récupérer l'utilisateur connecté
@@ -76,7 +77,7 @@ class ProfileController extends AbstractController
              return $this->redirectToRoute('app_login');
          }
  
-         
+         $NouveauNombre = $userRepository->findNouveauNombre();
         $form = $this->createForm(ResetPasswordRequestFormType::class);
 
         $form->handleRequest($request);
@@ -122,6 +123,7 @@ class ProfileController extends AbstractController
         }
         return $this->render('profile/change_pass.html.twig', [
             'paymentsNombre' => $paymentsNombre,
+            'NouveauNombre' => $NouveauNombre,
             'requestPassForm' => $form
         ]);
     }
@@ -130,7 +132,8 @@ class ProfileController extends AbstractController
 public function modifierProfil(
     Request $request,
     PaymentRepository $paymentRepository,
-    EntityManagerInterface $entityManager
+    EntityManagerInterface $entityManager,
+    UserRepository $userRepository
 ): Response {
     // Récupérer l'utilisateur connecté
     $user = $this->getUser();
@@ -143,7 +146,7 @@ public function modifierProfil(
     // Récupérer les informations supplémentaires
     $NomDeSociete = $user->getNomDeSociete();
     $paymentsNombre = $paymentRepository->findPaymentNombre();
-
+    $NouveauNombre = $userRepository->findNouveauNombre();
     // Créer et gérer le formulaire
     $form = $this->createForm(UserModiType::class, $user);
     $form->handleRequest($request);
@@ -165,6 +168,7 @@ public function modifierProfil(
         'user' => $user,
         'NomDeSociete' => $NomDeSociete,
         'paymentsNombre' => $paymentsNombre,
+        'NouveauNombre' => $NouveauNombre,
         'form' => $form->createView(),
     ]);
 }
@@ -195,7 +199,7 @@ public function modifierProfil(
     $userId = $utilisateurConnecte->getId();
     // Récupérer les paiements de l'utilisateur connecté
     $paiementsByUser = $paymentRepository->findPaymentsByUser($userId);
-    
+    $NouveauNombre = $userRepository->findNouveauNombre();
     $findPaymentsByUserAll = $paymentRepository->findPaymentsByUserAll($userId);
     // Créer un nouveau paiement et le formulaire associé
     $payment = new Payment();
@@ -371,6 +375,7 @@ public function modifierProfil(
         'NomDeSociete' => $NomDeSociete,
         'paiementsByUser' => $paiementsByUser,
         'findPaymentsByUserAll' => $findPaymentsByUserAll,
+        'NouveauNombre' => $NouveauNombre,
         'form' => $form,
     ]); 
 
@@ -381,7 +386,8 @@ public function modifierProfil(
         PaymentRepository $paymentRepository,
         Request $request,
         EntityManagerInterface $entityManager,
-        Payment $payment
+        Payment $payment,
+        UserRepository $userRepository
         ): Response
     {
         $utilisateurConnecte = $this->getUser();
@@ -402,7 +408,7 @@ public function modifierProfil(
         $form = $this->createForm(PaymentRetardEditType::class, $payment);
         $form->handleRequest($request);
         $montantRestant = $payment->getMontantRestant();
-
+        $NouveauNombre = $userRepository->findNouveauNombre();
         // Début de la transaction
         $entityManager->beginTransaction();
 
@@ -448,6 +454,7 @@ public function modifierProfil(
             'paymentsNombre' => $paymentsNombre,
             'payment' => $payment,
             'NomDeSociete' => $NomDeSociete,
+            'NouveauNombre' => $NouveauNombre,
             'form' => $form,
         ]);
     }
@@ -457,10 +464,12 @@ public function modifierProfil(
         PaymentRepository $paymentRepository,
         Request $request,
         EntityManagerInterface $entityManager,
-        Payment $payment
+        Payment $payment,
+        UserRepository $userRepository
     ): Response {
         $utilisateurConnecte = $this->getUser();
         $paymentsNombre = $paymentRepository->findPaymentNombre();
+        $NouveauNombre = $userRepository->findNouveauNombre();
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
@@ -516,16 +525,18 @@ public function modifierProfil(
             'paymentsNombre' => $paymentsNombre,
             'payment' => $payment,
             'NomDeSociete' => $NomDeSociete,
+            'NouveauNombre' => $NouveauNombre,
             'form' => $form->createView(),
         ]);
     }
 
     #[Route('/paiement/mes-retard/', name: 'app_mes_retard_paiement')]
-    public function mesretardPaiement(PaymentRepository $paymentRepository, Request $request): Response
+    public function mesretardPaiement(PaymentRepository $paymentRepository, Request $request,UserRepository $userRepository): Response
     {
         // Récupérer l'utilisateur connecté
         $utilisateurConnecte = $this->getUser();
         $paymentsNombre = $paymentRepository->findPaymentNombre();
+        $NouveauNombre = $userRepository->findNouveauNombre();
         // Si aucun utilisateur n'est connecté, rediriger vers la page de connexion
         if (!$utilisateurConnecte) {
             return $this->redirectToRoute('app_login');
@@ -553,6 +564,7 @@ public function modifierProfil(
         return $this->render('profile/mes_retard_paiement.html.twig', [
             'paymentsNombre' => $paymentsNombre,
             'paiements' => $paiements,
+            'NouveauNombre' => $NouveauNombre,
             'totalPages' => $totalPages,
             'currentPage' => $page,
         ]);

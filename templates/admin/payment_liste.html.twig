@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {{ include('partials/_sidebar.html.twig') }}
+        <div class="main-content">
+            <h1><strong>La liste des paiements des locataires</strong></h1>
+            <div class="table-responsive">
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Locataire</th>
+                            <th>Date de Paiement</th>
+                            <th>confirmer</th> 
+                            <th>Montant Validé</th> 
+                            <th>actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% set trans_months = {
+									"January": 'Janvier',
+									"February": 'Février',
+									"March": 'Mars',
+									"April": 'Avril',
+									"May": 'Mai',
+									"June": 'Juin',
+									"July": 'Juillet',
+									"August": 'Août',
+									"September": 'Septembre',
+									"October": 'Octobre',
+									"November": 'Novembre',
+									"December": 'Décembre'
+								} %}
+                    {% for payment in payments %}
+                        <tr>
+                            <td>{{ payment.users }}</td>
+                            <td>
+                             {% set day = payment.datePaiement|date('d') %}
+                                            {% set month = payment.datePaiement|date('F') %}
+                                            {% set year = payment.datePaiement|date('Y') %}
+                                            {{ day }} {{ trans_months[month] }} {{ year }} 
+                            </td>
+                            <td>
+                            {% if payment.paymentVerification %}
+                                        <span  class="badge bg-success"> Oui</span>
+                                    {% else %}
+                                        <span class="badge bg-danger"> Non</span>
+                                    {% endif %}
+                            </td>
+                            <td>
+                            {% if payment.montantRestant is empty %}
+											<strong>Traitement encour...</strong>
+										{% else %}
+											<strong>{{ ((payment.montantPrevu) - (payment.montantRestant))|number_format(0, ',', ' ') }}</strong>
+											
+										{% endif %}
+                            </td>
+                            <td>
+                                <form method="post" action="{{ path('app_admin_payment_delete', {'id': payment.id}) }}" onsubmit="return confirm('être vous sûr de supprimer ce paiement ? {{payment.datePaiement|date('F')}}?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ payment.id) }}">
+                                    <button class="btn btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8">no records found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table> 
+            </div>
+            <!-- Pagination -->
+				{% if totalPages > 1 %}
+					<div class="row justify-content-center mt-2">
+						<div class="col-md-10">
+							<nav aria-label="Page navigation example">
+								<ul class="pagination justify-content-center">
+
+									<!-- Bouton "Précédent" -->
+									{% if currentPage > 1 %}
+										<li class="page-item">
+											<a class="page-link" href="{{ path('app_admin_paiement_liste_Super', {'page': currentPage - 1}) }}" aria-label="Précédent">
+												<span aria-hidden="true">Précédent</span>
+											</a>
+										</li>
+									{% else %}
+										<li class="page-item disabled">
+											<a class="page-link" href="#" aria-label="Précédent">
+												<span aria-hidden="true">Précédent</span>
+											</a>
+										</li>
+									{% endif %}
+
+									<!-- Liens numérotés des pages -->
+									{% for page in range(1, totalPages) %}
+										{% if page == currentPage %}
+											<li class="page-item active">
+												<span class="page-link">{{ page }}</span>
+											</li>
+										{% elseif page == 1 or page == totalPages or (page >= currentPage - 1 and page <= currentPage + 1) %}
+											<li class="page-item">
+												<a class="page-link" href="{{ path('app_admin_paiement_liste_Super', {'page': page}) }}">{{ page }}</a>
+											</li>
+										{% elseif page == currentPage - 2 or page == currentPage + 2 %}
+											<li class="page-item disabled">
+												<span class="page-link">...</span>
+											</li>
+										{% endif %}
+									{% endfor %}
+
+									<!-- Bouton "Suivant" -->
+									{% if currentPage < totalPages %}
+										<li class="page-item">
+											<a class="page-link" href="{{ path('app_admin_paiement_liste_Super', {'page': currentPage + 1}) }}" aria-label="Suivant">
+												<span aria-hidden="true">Suivant</span>
+											</a>
+										</li>
+									{% else %}
+										<li class="page-item disabled">
+											<a class="page-link" href="#" aria-label="Suivant">
+												<span aria-hidden="true">Suivant</span>
+											</a>
+										</li>
+									{% endif %}
+
+								</ul>
+							</nav>
+						</div>
+					</div>
+				{% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -399,6 +399,18 @@ class PaymentRepository extends ServiceEntityRepository
     return (int) $query->getSingleScalarResult();
 }
 
+    public function findPaymentListe(int $page, int $limit = 8): array
+    {
+        $offset = ($page - 1) * $limit;
+
+        return $this->createQueryBuilder('p')
+            ->orderBy('p.datePaiement', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+    }
+
 
 
     //    /**

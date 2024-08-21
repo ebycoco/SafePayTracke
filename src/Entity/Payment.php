@@ -4,15 +4,12 @@ namespace App\Entity;
 
 use App\Entity\Traits\AppTimesTampable;
 use App\Repository\PaymentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Table(name: '`Payment`')]
-
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
 #[Vich\Uploadable]
 #[ORM\HasLifecycleCallbacks]
@@ -34,11 +31,10 @@ class Payment
     #[ORM\Column(nullable: true)]
     private ?int $totalMontantPayer = null;
 
-    // NOTE: This is not a mapped field of entity metadata, just a simple property.
     #[Vich\UploadableField(mapping: 'recu', fileNameProperty: 'recuDePaiement')]
     private ?File $imageFile = null;
 
-    #[ORM\Column (nullable: true,length: 255)] 
+    #[ORM\Column(nullable: true, length: 255)]
     private ?string $recuDePaiement = null;
 
     #[ORM\Column(nullable: true)]
@@ -56,14 +52,8 @@ class Payment
     #[ORM\Column]
     private ?bool $isVerifier = false;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?PaymentVerification $PaymentVerification = null;
-
-    /**
-     * @var Collection<int, PaymentVerification>
-     */
-    #[ORM\OneToMany(targetEntity: PaymentVerification::class, mappedBy: 'Payment')]
-    private Collection $paymentVerifications;
+    #[ORM\OneToOne(mappedBy: 'payment', cascade: ['persist', 'remove'])]
+    private ?PaymentVerification $paymentVerification = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $datePaiement = null;
@@ -79,11 +69,6 @@ class Payment
 
     #[ORM\Column(nullable: true)]
     private ?int $avancePaiement = null;
-
-    public function __construct()
-    {
-        $this->paymentVerifications = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -126,18 +111,11 @@ class Payment
         return $this;
     }
 
-
-    /**
-     *
-     * @param File|\Symfony\Component\HttpFoundation\File\UploadedFile|null $imageFile
-     */
     public function setImageFile(?File $imageFile = null): void
     {
         $this->imageFile = $imageFile;
 
         if (null !== $imageFile) {
-            // It is required that at least one field changes if you are using doctrine
-            // otherwise the event listeners won't be called and the file is lost
             $this->updatedAt = new \DateTimeImmutable();
         }
     }
@@ -219,45 +197,22 @@ class Payment
         return $this;
     }
 
-
     public function getPaymentVerification(): ?PaymentVerification
     {
-        return $this->PaymentVerification;
+        return $this->paymentVerification;
     }
 
-    public function setPaymentVerification(?PaymentVerification $PaymentVerification): static
+    public function setPaymentVerification(?PaymentVerification $paymentVerification): static
     {
-        $this->PaymentVerification = $PaymentVerification;
+        if ($paymentVerification === null && $this->paymentVerification !== null) {
+            $this->paymentVerification->setPayment(null);
+        }
 
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, PaymentVerification>
-     */
-    public function getPaymentVerifications(): Collection
-    {
-        return $this->paymentVerifications;
-    }
-
-    public function addPaymentVerification(PaymentVerification $paymentVerification): static
-    {
-        if (!$this->paymentVerifications->contains($paymentVerification)) {
-            $this->paymentVerifications->add($paymentVerification);
+        if ($paymentVerification !== null && $paymentVerification->getPayment() !== $this) {
             $paymentVerification->setPayment($this);
         }
 
-        return $this;
-    }
-
-    public function removePaymentVerification(PaymentVerification $paymentVerification): static
-    {
-        if ($this->paymentVerifications->removeElement($paymentVerification)) {
-            // set the owning side to null (unless already changed)
-            if ($paymentVerification->getPayment() === $this) {
-                $paymentVerification->setPayment(null);
-            }
-        }
+        $this->paymentVerification = $paymentVerification;
 
         return $this;
     }

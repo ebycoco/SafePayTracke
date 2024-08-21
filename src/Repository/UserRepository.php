@@ -84,6 +84,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     return (int) $query->getSingleScalarResult();
 }
+   public function findUserliste(int $page, int $limit = 8): array
+{
+    $offset = ($page - 1) * $limit;
+    return $this->createQueryBuilder('u') 
+        ->orderBy('u.id', 'DESC')
+        ->setMaxResults($limit)
+        ->setFirstResult($offset)
+        ->getQuery()
+        ->getResult();
+}
 
 
     //    /**

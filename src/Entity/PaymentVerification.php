@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Traits\AppTimesTampable; 
+use App\Entity\Traits\AppTimesTampable;
 use App\Repository\PaymentVerificationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -27,8 +27,9 @@ class PaymentVerification
     #[ORM\Column(length: 255)]
     private ?string $typePaiement = null;
 
-    #[ORM\ManyToOne(inversedBy: 'paymentVerifications')]
-    private ?Payment $Payment = null;
+    #[ORM\OneToOne(inversedBy: 'paymentVerification', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Payment $payment = null;
 
     public function getId(): ?int
     {
@@ -73,17 +74,17 @@ class PaymentVerification
 
     public function getPayment(): ?Payment
     {
-        return $this->Payment;
+        return $this->payment;
     }
 
-    public function setPayment(?Payment $Payment): static
+    public function setPayment(?Payment $payment): static
     {
-        $this->Payment = $Payment;
+        $this->payment = $payment;
 
         return $this;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return sprintf('PaymentVerification #%d', $this->id);
     }

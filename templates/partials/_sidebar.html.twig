@@ -33,6 +33,12 @@
 						<i class="fas fa-bell"> {{NouveauNombre}}</i>
 					{% endif %}
 				</a>
+				<a class="btn btn-primary {{set_active_route('app_admin_paiement_liste_Super')}}" href="{{ path('app_admin_paiement_liste_Super') }}">
+					Paiement
+					{% if NouveauNombre > 0 %}
+						<i class="fas fa-bell"> {{NouveauNombre}}</i>
+					{% endif %}
+				</a>
 			{% endif %}
 			<a class="btn btn-primary {{set_active_route('modifier_profil')}}" href="{{ path('modifier_profil')}}">Modifier Profil</a>
 			<a class="btn btn-primary {{set_active_route('app_profile_pass_change')}}" href="{{ path('app_profile_pass_change')}}">Changer mot de passe</a>
