@@ -45,7 +45,7 @@
                                     {{ trans_day_hash[dateFormatee|date('F')] ~ ' ' ~ dateFormatee|date('Y') }}
                                 </td>
                                 <td>{{ payment.users.nomDeSociete }}</td>
-                                {% if payment.paymentVerifications is empty %}
+                                {% if payment.paymentVerification is empty %}
                                     <td>Pas encore</td>
                                 {% else %}
                                     <td>{{ payment.montantPrevu }} (Fcfa)</td>
